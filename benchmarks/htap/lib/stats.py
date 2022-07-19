@@ -24,11 +24,11 @@ class OLTPBucketStats:
         self.max_runtime = 0
         self.acc_runtime = 0
 
-    def add_sample(self, status, runtime):
+    def add_sample(self, status, runtime, count):
         if status == 'ok':
-            self.ok_transactions += 1
+            self.ok_transactions += count
         else:
-            self.err_transactions += 1
+            self.err_transactions += count
 
         runtime = runtime * 1000
         self.min_runtime = min(self.min_runtime, runtime)
@@ -105,7 +105,7 @@ class Stats:
 
     def _update_oltp_stats(self, stats):
         for stat in stats:
-            self.data['oltp_counts'][stat['query']][stat['status']] += 1
+            self.data['oltp_counts'][stat['query']][stat['status']] += stat['count']
 
             oltp = self.data['oltp']
             second = int(stat['timestamp'])
@@ -122,7 +122,7 @@ class Stats:
             # Now it is garanteed that we have a bucket for the second of this sample
             bucket = oltp[second - oltp[0][0]]
             assert (bucket[0] == second)
-            bucket[1][stat['query']].add_sample(stat['status'], stat['runtime'])
+            bucket[1][stat['query']].add_sample(stat['status'], stat['runtime'], stat['count'])
 
     def _update_olap_stats(self, stat):
         stream_id = stat['stream']
