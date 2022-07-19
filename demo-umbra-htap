@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+UMBRA_PATH=${UMBRA_PATH:-.}
+DB_PATH=${DB_PATH:-.}
+
+SCALE_FACTOR=$1
+OLTP_WORKERS=$2
+OLAP_WORKERS=$3
+
+# Clear the database directory
+rm -rf ${DB_PATH}/htap
+mkdir -p ${DB_PATH}/htap
+
+# Create the initial database state and start a server
+${UMBRA_PATH}/sql -createdb ${DB_PATH}/htap/umbra.db <<< "ALTER ROLE postgres WITH LOGIN PASSWORD 'postgres';"
+COMPILATIONOMDE=o BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server ${DB_PATH}/htap/umbra.db &
+
+# Load the initial database population
+./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
+
+# Run the HTAP benchmark
+./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres htap --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
+
+# Shutdown the server
+kill -INT %1
+wait
