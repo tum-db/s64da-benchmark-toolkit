@@ -47,7 +47,7 @@ class TransactionalWorker:
             if tmp != home_ware:
                 return tmp
 
-    def execute_sql(self, sql, args, query_type):
+    def execute_sql(self, sql, args, query_type, error=False):
         if self.dry_run:
             return
         start = time.time()
@@ -55,26 +55,7 @@ class TransactionalWorker:
         # if we get timeouts the benchmark gets inbalanced and we eventually get
         # to a complete halt.
         self.conn.cursor.execute(sql, args, prepare=True)
-        self.add_stats(query_type, 'ok', start)
-
-    def execute_sql_new_order(self, sql, args):
-        if self.dry_run:
-            return
-        old_autocommit = self.conn.conn.autocommit
-        self.conn.conn.autocommit = False
-        start = time.time()
-        # do not catch timeouts because we want that to stop the benchmark.
-        # if we get timeouts the benchmark gets inbalanced and we eventually get
-        # to a complete halt.
-        self.conn.cursor.execute(sql, args, prepare=True)
-        result = self.conn.cursor.fetchone()
-        if result[0] == True:
-            self.conn.conn.commit()
-            self.add_stats('new_order', 'ok', start)
-        else:
-            self.conn.conn.rollback()
-            self.add_stats('new_order', 'error', start)
-        self.conn.conn.autocommit = old_autocommit
+        self.add_stats(query_type, 'ok', start) if not error else self.add_stats(query_type, 'error', start)
 
     def new_order(self, timestamp):
         w_id = self.random.randint_inclusive(1, self.num_warehouses)
@@ -100,11 +81,11 @@ class TransactionalWorker:
 
             qty.append(self.random.randint_inclusive(1, 10))
 
-        sql = 'SELECT new_order(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'CALL new_order(%t::integer, %t::integer, %t::integer, %t::integer, %t::integer, %t::integer array, %t::integer array, %t::integer array, %t::timestamptz)'
         args = (w_id, c_id, d_id, order_line_count, all_local, itemid, supware, qty, timestamp)
         # rolled back or commit tsxs they both count
         self.new_order_count += 1
-        self.execute_sql_new_order(sql, args)
+        self.execute_sql(sql, args, 'new_order', rbk == 1)
 
     def payment(self, timestamp):
         w_id = self.random.randint_inclusive(1, self.num_warehouses)
@@ -121,7 +102,7 @@ class TransactionalWorker:
             c_w_id = self.other_ware(w_id)
             c_d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
 
-        sql = 'SELECT payment(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'CALL payment(%t, %t, %t, %t, %t, %t::numeric(12,2), %t, %t::varchar(16), %t::timestamptz)'
         args = (w_id, d_id, c_d_id, c_id, c_w_id, h_amount, byname, c_last, timestamp)
         self.execute_sql(sql, args, 'payment')
 
@@ -132,7 +113,7 @@ class TransactionalWorker:
         c_last = self.oltp_text.lastname(self.random.nurand(255, 0, 999))
         byname = self.random.randint_inclusive(1, 100) <= 60
 
-        sql = 'SELECT * FROM order_status(%s, %s, %s, %s, %s)'
+        sql = 'CALL order_status(%t::integer, %t::integer, %t::integer, %t::varchar(24), %t::boolean)'
         args = (w_id, d_id, c_id, c_last, byname)
         self.execute_sql(sql, args, 'order_status')
 
@@ -140,7 +121,7 @@ class TransactionalWorker:
         w_id = self.random.randint_inclusive(1, self.num_warehouses)
         o_carrier_id = self.random.randint_inclusive(1, 10)
 
-        sql = 'SELECT * FROM delivery(%s, %s, %s, %s)'
+        sql = 'CALL delivery(%t, %t, %t, %t::timestamptz)'
         args = (w_id, o_carrier_id, DIST_PER_WARE, timestamp)
         self.execute_sql(sql, args, 'delivery')
 
@@ -149,7 +130,7 @@ class TransactionalWorker:
         d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
         level = self.random.randint_inclusive(10, 20)
 
-        sql = 'SELECT * FROM stock_level(%s, %s, %s)'
+        sql = 'CALL stock_level(%t, %t, %t)'
         args = (w_id, d_id, level)
         self.execute_sql(sql, args, 'stock_level')
 

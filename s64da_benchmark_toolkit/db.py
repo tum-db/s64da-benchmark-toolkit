@@ -21,7 +21,8 @@ class Status(Enum):
 
 
 class DB:
-    def __init__(self, dsn):
+    def __init__(self, args, dsn):
+        self.args = args
         self.dsn = dsn
         dsn_url = urlparse(dsn)
         self.dsn_pg_db = f'{dsn_url.scheme}://{dsn_url.netloc}/postgres'
@@ -79,7 +80,7 @@ class DB:
 
             finally:
                 stop = time.time()
-                plan = DB.get_explain_output(conn.conn, sql)
+                plan = DB.get_explain_output(conn.conn, sql, self.args.umbra)
 
             return Timing(start=start, stop=stop, status=status), query_result, plan
 
@@ -100,10 +101,10 @@ class DB:
             conn.cursor.execute(f'SET {key} = $${value}$$')
 
     @staticmethod
-    def get_explain_output(connection, sql):
+    def get_explain_output(connection, sql, umbra):
         try:
             with connection.cursor() as explain_plan_cursor:
-                explain_plan_cursor.execute(sql.replace('-- EXPLAIN (FORMAT JSON)', 'EXPLAIN (FORMAT JSON)'))
+                explain_plan_cursor.execute(sql.replace('-- EXPLAIN (FORMAT JSON)', 'EXPLAIN (FORMAT JSON)' if not umbra else 'EXPLAIN VERBOSE'))
                 return json.dumps(explain_plan_cursor.fetchone()[0], indent=4)
 
         except psycopg.Error as e:

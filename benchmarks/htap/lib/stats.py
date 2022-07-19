@@ -256,7 +256,7 @@ class Stats:
         return (int(avg_runtime_it), completed_iterations)
 
     def db_size(self):
-        return "{:7.2f}GB".format(self.cached_database_size / (1024 * 1024 * 1024.0))
+        return "{:7.2f}GB".format(self.cached_database_size / (1024 * 1024 * 1024.0)) if self.cached_database_size else "- GB"
 
     def columnstore_stats(self):
         result = []

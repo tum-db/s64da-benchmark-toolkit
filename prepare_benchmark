@@ -84,6 +84,10 @@ if __name__ == '__main__':
         'The start date for TPC-C.'
     ))
 
+    args_to_parse.add_argument('--umbra', default=False, action='store_true',
+        required=False, help=('Run in Umbra compatibility mode')
+    )
+
     args = args_to_parse.parse_args()
     for benchmark in benchmarks:
         if benchmark.name == args.benchmark:

@@ -107,6 +107,10 @@ def parse_arguments(argv, benchmarks):
         required=False, help=('Use server-side cursors for executing the queries')
     )
 
+    common_parser.add_argument('--umbra', default=False, action='store_true',
+        required=False, help=('Run in Umbra compatibility mode')
+    )
+
     subparsers = common_parser.add_subparsers(dest='benchmark')
     add_streams_parsers(subparsers, benchmarks)
     htap.add_parser(subparsers)

@@ -172,8 +172,8 @@ class AnalyticalStream:
         }))
 
         if not self.args.dry_run:
-            db = DB(self.dsn)
-            timing, _, plan = DB(self.dsn).run_query(
+            db = DB(self.args, self.dsn)
+            timing, _, plan = DB(self.args, self.dsn).run_query(
                 sql, self.args.olap_timeout,
                 self.args.explain_analyze, self.args.use_server_side_cursors)
             runtime = timing.stop - timing.start

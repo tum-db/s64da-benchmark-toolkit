@@ -62,6 +62,10 @@ def add_parser(subparsers):
                                          'Multiple options possible, separated by space'
                                          ))
 
+    parser.add_argument('--no-async-commit', action='store_true', default=False,
+                        help=('Whether to employ async commit semantics.'
+                              ))
+
     parser.add_argument('--csv-file', default='results.csv', help=(
         'Where to save the summary csv file, if csv output is selected. '
         'The default is results.csv in the current directory.'

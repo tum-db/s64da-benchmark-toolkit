@@ -130,7 +130,7 @@ class PrepareBenchmarkFactory:
 
         # If we're asked to use only with one job, run the tasks directly
         # in the main process to ease profiling.
-        if self.args.max_jobs == 1:
+        if self.args.max_jobs == 1 or self.args.umbra:
             for task in tasks:
                 runnable = get_runnable_task(task)
                 result = runnable[0](*runnable[1:]) if len(runnable) > 1 else runnable[0]()
@@ -238,11 +238,12 @@ class PrepareBenchmarkFactory:
         dsn_url = urlparse(self.args.dsn)
         dbname = dsn_url.path[1:]
 
-        with DBConn(f'{dsn_url.scheme}://{dsn_url.netloc}/postgres') as conn:
-            print(f'Deleting Database {dbname} if it already exists')
-            conn.cursor.execute(f'DROP DATABASE IF EXISTS {dbname}')
-            print(f'Creating Database {dbname}')
-            conn.cursor.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'UTF-8'")
+        if not self.args.umbra:
+            with DBConn(f'{dsn_url.scheme}://{dsn_url.netloc}/postgres') as conn:
+                print(f'Deleting Database {dbname} if it already exists')
+                conn.cursor.execute(f'DROP DATABASE IF EXISTS {dbname}')
+                print(f'Creating Database {dbname}')
+                conn.cursor.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'UTF-8'")
 
         applied_schema_path = os.path.join(s64_benchmark_toolkit_root_dir, 'applied_schema.sql')
 
@@ -253,10 +254,11 @@ class PrepareBenchmarkFactory:
             applied_schema_file.write(applied_schema)
 
         with DBConn(self.args.dsn) as conn:
-            print('Adding helper functions.')
-            common_file_path = os.path.join(s64_benchmark_toolkit_root_dir, 'benchmarks', 'common', 'functions.sql')
-            with open(common_file_path, 'r') as common_sql:
-                conn.cursor.execute(common_sql.read())
+            if not self.args.umbra:
+                print('Adding helper functions.')
+                common_file_path = os.path.join(s64_benchmark_toolkit_root_dir, 'benchmarks', 'common_postgres', 'functions.sql')
+                with open(common_file_path, 'r') as common_sql:
+                    conn.cursor.execute(common_sql.read())
 
             self._load_pre_schema(conn)
             self._load_schema(conn, applied_schema_path)
@@ -278,24 +280,25 @@ class PrepareBenchmarkFactory:
             self._run_tasks_parallel(tasks)
 
     def add_common(self):
-        common_path = os.path.join(self.schema_dir, '..', 'common', '*.sql')
+        common_path = os.path.join(self.schema_dir, '..', 'common_postgres', '*.sql') if not self.args.umbra else os.path.join(self.schema_dir, '..', 'common_umbra', '*.sql')
         tasks = [self.psql_exec_file(sql_file) for sql_file in glob.glob(common_path)]
         self._run_tasks_parallel(tasks)
 
     def vacuum_analyze(self):
-        print(f'Running VACUUM-ANALYZE on {self.args.dsn}')
+        if not self.args.umbra:
+            print(f'Running VACUUM-ANALYZE on {self.args.dsn}')
 
-        vacuum_tasks = []
-        analyze_tasks = []
-        tables = PrepareBenchmarkFactory.TABLES_ANALYZE or PrepareBenchmarkFactory.TABLES
-        for table_group in tables:
-            for table in table_group:
-                vacuum_tasks.append(self.psql_exec_cmd(f'VACUUM {table}'))
-                analyze_tasks.append(self.psql_exec_cmd(f'ANALYZE {table}'))
+            vacuum_tasks = []
+            analyze_tasks = []
+            tables = PrepareBenchmarkFactory.TABLES_ANALYZE or PrepareBenchmarkFactory.TABLES
+            for table_group in tables:
+                for table in table_group:
+                    vacuum_tasks.append(self.psql_exec_cmd(f'VACUUM {table}'))
+                    analyze_tasks.append(self.psql_exec_cmd(f'ANALYZE {table}'))
 
-        # WARNING: do NOT run vacuum and analyze at the same time because analyze stops as soon as it cannot take the lock...
-        self._run_tasks_parallel(vacuum_tasks)
-        self._run_tasks_parallel(analyze_tasks)
+            # WARNING: do NOT run vacuum and analyze at the same time because analyze stops as soon as it cannot take the lock...
+            self._run_tasks_parallel(vacuum_tasks)
+            self._run_tasks_parallel(analyze_tasks)
 
     def update_all_columnstores(self):
         version = self.swarm64da_version

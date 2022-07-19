@@ -55,6 +55,9 @@ class HTAPController:
         # do NOT introduce timeouts for the oltp queries! this will make that
         # the workload gets inbalanaced and eventually the whole benchmark stalls
         with DBConn(self.args.dsn) as conn:
+            if not self.args.no_async_commit:
+                conn.conn.execute('SET synchronous_commit = off') if not self.args.umbra else conn.conn.execute('SET async_commit = on')
+
             oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn,
                                               self.args.dry_run)
             next_reporting_time = time.time() + 0.1
@@ -149,7 +152,7 @@ class HTAPController:
             with Pool(num_total_workers, worker_init) as pool:
                 oltp_workers = pool.map_async(self.oltp_worker, range(self.args.oltp_workers))
                 olap_workers = pool.map_async(self.olap_worker, range(self.args.olap_workers))
-                analyze_worker = pool.apply_async(self.analyze_worker)
+                analyze_worker = pool.apply_async(self.analyze_worker) if not self.args.umbra else None
 
                 try:
                     update_interval = timedelta(seconds=min(self.args.monitoring_interval, self.args.csv_interval))
@@ -164,7 +167,7 @@ class HTAPController:
                             oltp_workers.get()
                         if self.args.olap_workers > 0 and olap_workers.ready():
                             olap_workers.get()
-                        if analyze_worker.ready():
+                        if analyze_worker is not None and analyze_worker.ready():
                             analyze_worker.get()
 
                         while datetime.now() < next_update:

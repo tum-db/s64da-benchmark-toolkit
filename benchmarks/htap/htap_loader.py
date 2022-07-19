@@ -71,7 +71,7 @@ class Loader():
                     self.oltp_text.string(10, prefix='city-'),
                     self.oltp_text.state(),
                     self.oltp_text.numstring(5, prefix='zip-'),
-                    self.random.sample() * 0.2,
+                    '%.2f' % (self.random.sample() * 0.2),
                     300000,
                 ],
             ]
@@ -87,7 +87,7 @@ class Loader():
             self.oltp_text.string(10, prefix='city-'),
             self.oltp_text.state(),
             self.oltp_text.numstring(5, prefix='zip-'),
-            self.random.sample() * 0.2,
+            '%.2f' % (self.random.sample() * 0.2),
             30000,
             NUM_ORDERS + 1,
         ])
@@ -118,7 +118,7 @@ class Loader():
             self.oltp_text.numstring(5, prefix='zip-'),
             self.oltp_text.numstring(16), self.start_date,
             'GC' if self.random.randint_inclusive(1, 100) > 10 else 'BC', 50000,
-            self.random.sample() * 0.5, -10, 10, 1, 0,
+            '%.2f' % (self.random.sample() * 0.5), -10, 10, 1, 0,
             self.oltp_text.string(self.random.randint_inclusive(300, 500))
         ])
 
@@ -192,7 +192,7 @@ class Loader():
                 self.random.randint_inclusive(1, MAX_ITEMS), self.warehouse_id,
                 (entry_date + self.delivery_offset) if o_id < FIRST_UNPROCESSED_O_ID else None,
                 5,
-                0 if o_id < FIRST_UNPROCESSED_O_ID else self.random.sample() * 9999.99,
+                0 if o_id < FIRST_UNPROCESSED_O_ID else '%.2f' % (self.random.sample() * 9999.99),
                 self.oltp_text.string(24)
             ])
         return rows
@@ -229,7 +229,7 @@ class Loader():
 
     def generate_item(self, i_id):
         i_im_id = self.random.randint_inclusive(1, 10000)
-        i_price = self.random.sample() * 100 + 1
+        i_price = '%.2f' % (self.random.sample() * 100 + 1)
 
         i_name_suffix = self.oltp_text.string(5)
         i_name = f'item-{i_im_id}-{i_price}-{i_name_suffix}'
