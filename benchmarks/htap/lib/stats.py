@@ -5,7 +5,6 @@ import time
 
 from collections import defaultdict, deque
 from datetime import datetime
-from psycopg2.extras import register_uuid
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -13,7 +12,6 @@ from benchmarks.htap.lib.analytical import QUERY_IDS, is_ignored_query
 from s64da_benchmark_toolkit.dbconn import DBConn
 
 LOG = logging.getLogger()
-register_uuid()
 
 QUERY_TYPES = ['new_order', 'payment', 'order_status', 'delivery', 'stock_level']
 
@@ -119,8 +117,7 @@ class Stats:
                 # Sample goes beyond the horizon, expand the bucket list to accomodate all these seconds
                 # As the struct is a deque, older buckets in the left side are automatically removed when we go beyond the maximum history size
                 base = oltp[-1][0]
-                oltp.extend(
-                    (base + i, {k: OLTPBucketStats() for k in QUERY_TYPES}) for i in range(1, 1 + second - base))
+                oltp.extend((base + i, {k: OLTPBucketStats() for k in QUERY_TYPES}) for i in range(1, 1 + second - base))
 
             # Now it is garanteed that we have a bucket for the second of this sample
             bucket = oltp[second - oltp[0][0]]
@@ -156,13 +153,16 @@ class Stats:
     def _update_cached_stats(self):
         with self.conn as conn:
             try:
-                conn.cursor.execute(
-                    "select DISTINCT table_name,relation_blocks,compressed_blocks,cache_pages_usable from swarm64da.stat_all_column_store_indexes")
+                conn.cursor.execute("select DISTINCT table_name,relation_blocks,compressed_blocks,cache_pages_usable from swarm64da.stat_all_column_store_indexes")
                 self.cached_columnstore_stats = conn.cursor.fetchall()
             except:
                 self.cached_columnstore_stats = []
-            self.conn.cursor.execute(f"select pg_database_size('{self.database}')")
-            self.cached_database_size = conn.cursor.fetchone()[0]
+
+            try:
+                self.conn.cursor.execute(f"select pg_database_size('{self.database}')")
+                self.cached_database_size = conn.cursor.fetchone()[0]
+            except:
+                self.cached_database_size = []
 
     def process_queue(self, reporting_queue):
         while not reporting_queue.empty():

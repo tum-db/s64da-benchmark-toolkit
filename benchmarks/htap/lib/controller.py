@@ -5,7 +5,7 @@ import traceback
 
 from datetime import datetime, timedelta
 from multiprocessing import Pool, Value, Queue
-from psycopg2.errors import DuplicateDatabase, DuplicateTable, ProgrammingError
+from psycopg.errors import DuplicateDatabase, DuplicateTable, ProgrammingError
 from urllib.parse import urlparse
 
 from benchmarks.htap.lib.analytical import AnalyticalStream

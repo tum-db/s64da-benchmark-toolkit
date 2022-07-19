@@ -8,7 +8,7 @@ from itertools import cycle
 from os import path
 from string import Template
 
-import psycopg2
+import psycopg
 import yaml
 
 from benchmarks.htap.lib.helpers import Random, TPCH_DATE_RANGE, WANTED_RANGE

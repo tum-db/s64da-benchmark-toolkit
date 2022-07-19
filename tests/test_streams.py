@@ -150,8 +150,8 @@ def test_run_multiple_streams(mocker, args, benchmark, reporting_queue):
 
 
 def test_run_stream(no_plan, mocker, args, benchmark, reporting_queue):
-    psycopg2_connect = mocker.patch('psycopg2.connect')
-    mock_conn = psycopg2_connect.return_value
+    psycopg_connect = mocker.patch('psycopg.connect')
+    mock_conn = psycopg_connect.return_value
     mock_cursor = mock_conn.cursor.return_value
 
     test_sequence = tuple([1, 2001, -3, 4])

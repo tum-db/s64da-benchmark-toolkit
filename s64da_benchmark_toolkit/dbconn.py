@@ -1,8 +1,7 @@
 import logging
 import time
 
-import psycopg2
-from psycopg2.extras import DictCursor
+import psycopg
 
 LOG = logging.getLogger()
 
@@ -23,13 +22,13 @@ class DBConn:
         trial = 0
         while trial < self.num_retries:
             try:
-                self.conn = psycopg2.connect(self.dsn, options=options)
+                self.conn = psycopg.connect(self.dsn, options=options)
                 self.conn.autocommit = True
-                self.cursor = self.conn.cursor(cursor_factory=DictCursor if self.use_dict_cursor else None)
+                self.cursor = self.conn.cursor(row_factory=psycopg.rows.dict_row if self.use_dict_cursor else None)
                 self.server_side_cursor = self.conn.cursor('server-side-cursor')
                 break
 
-            except psycopg2.Error as exc:
+            except psycopg.Error as exc:
                 LOG.info(f'Cannot connect to DB. Retrying. Error: {exc}')
                 trial += 1
                 time.sleep(self.retry_wait)

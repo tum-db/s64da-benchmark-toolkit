@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 from .dbconn import DBConn
 
-import psycopg2
+import psycopg
 
 LOG = logging.getLogger()
 Timing = namedtuple('Timing', ['start', 'stop', 'status'])
@@ -40,8 +40,6 @@ class DB:
 
     def run_query(self, sql, timeout, auto_explain=False, use_server_side_cursors=False):
         status = Status.ERROR
-        query_result = None
-        plan = None
         with DBConn(self.dsn, statement_timeout=timeout) as conn:
             try:
                 start = time.time()
@@ -70,27 +68,18 @@ class DB:
                 else:
                     query_result = None
                 status = Status.OK
-                # each notice can take multiple lines; we just want all lines separately
-                # so we can filter easily as we don't want the lines that have "LOG:" in them
-                # but only want the real json output
-                notice_lines = '\n'.join(conn.conn.notices).split('\n')
-                plan = '\n'.join(filter(lambda line: not line.startswith("LOG:"), notice_lines))
-                # make it proper json
-                if plan.strip() != '':
-                    plan = f'[{plan}]'
 
-            except psycopg2.extensions.QueryCanceledError:
+            except psycopg.errors.QueryCanceled:
                 status = Status.TIMEOUT
                 query_result = None
 
-            except (psycopg2.InternalError, psycopg2.Error, UnicodeDecodeError):
-                LOG.exception('Ignoring psycopg2 Error')
+            except (psycopg.InternalError, psycopg.Error, UnicodeDecodeError):
+                LOG.exception('Ignoring psycopg Error')
                 query_result = None
 
             finally:
                 stop = time.time()
-                if plan == None or plan.strip() == '':
-                    plan = DB.get_explain_output(conn.conn, sql)
+                plan = DB.get_explain_output(conn.conn, sql)
 
             return Timing(start=start, stop=stop, status=status), query_result, plan
 
@@ -117,7 +106,7 @@ class DB:
                 explain_plan_cursor.execute(sql.replace('-- EXPLAIN (FORMAT JSON)', 'EXPLAIN (FORMAT JSON)'))
                 return json.dumps(explain_plan_cursor.fetchone()[0], indent=4)
 
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             return f'{{"Explain Output failed": "{str(e)}"}}'
 
         except json.JSONDecodeError as e:

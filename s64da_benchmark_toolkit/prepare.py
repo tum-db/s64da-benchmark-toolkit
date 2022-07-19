@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExec
 from jinja2 import Environment, FileSystemLoader
 from packaging.version import Version
 from pathlib import Path
-from psycopg2 import ProgrammingError, errors
+from psycopg import ProgrammingError, errors
 from sqlparse import split as sqlparse_split
 from subprocess import Popen, PIPE
 from urllib.parse import urlparse

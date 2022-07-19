@@ -1,6 +1,6 @@
 from unittest.mock import call
 
-import psycopg2
+import psycopg
 import pytest
 import json
 
@@ -11,8 +11,8 @@ DSN_PG = 'postgresql://postgres@nowhere:1234/postgres'
 
 
 def get_mocked_conn(mocker):
-    psycopg2_connect = mocker.patch('psycopg2.connect')
-    return psycopg2_connect.return_value
+    psycopg_connect = mocker.patch('psycopg.connect')
+    return psycopg_connect.return_value
 
 
 def get_mocked_cursor(mocker):
@@ -71,7 +71,7 @@ def test_db_run_query_ok(no_plan, mocker):
 
 def test_db_run_query_timeout(no_plan, mocker):
     mock_cursor = get_mocked_cursor(mocker)
-    mock_cursor.execute.side_effect = psycopg2.extensions.QueryCanceledError('Timeout')
+    mock_cursor.execute.side_effect = psycopg.extensions.QueryCanceledError('Timeout')
 
     result, query_output, _ = db.DB(DSN).run_query('SELECT 1', 0)
     assert result.status == db.Status.TIMEOUT
@@ -82,7 +82,7 @@ def test_db_run_query_timeout(no_plan, mocker):
 
 def test_db_run_query_error(no_plan, mocker):
     mock_cursor = get_mocked_cursor(mocker)
-    mock_cursor.execute.side_effect = psycopg2.InternalError('Error')
+    mock_cursor.execute.side_effect = psycopg.InternalError('Error')
 
     result, query_output, _ = db.DB(DSN).run_query('SELECT 1', 0)
     assert result.status == db.Status.ERROR

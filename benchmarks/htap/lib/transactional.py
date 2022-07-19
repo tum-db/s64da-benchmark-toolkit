@@ -1,4 +1,3 @@
-import psycopg2
 import time
 from datetime import datetime
 from collections import deque
@@ -55,7 +54,7 @@ class TransactionalWorker:
         # do not catch timeouts because we want that to stop the benchmark.
         # if we get timeouts the benchmark gets inbalanced and we eventually get
         # to a complete halt.
-        self.conn.cursor.execute(sql, args)
+        self.conn.cursor.execute(sql, args, prepare=True)
         self.add_stats(query_type, 'ok', start)
 
     def execute_sql_new_order(self, sql, args):
@@ -67,7 +66,7 @@ class TransactionalWorker:
         # do not catch timeouts because we want that to stop the benchmark.
         # if we get timeouts the benchmark gets inbalanced and we eventually get
         # to a complete halt.
-        self.conn.cursor.execute(sql, args)
+        self.conn.cursor.execute(sql, args, prepare=True)
         result = self.conn.cursor.fetchone()
         if result[0] == True:
             self.conn.conn.commit()
