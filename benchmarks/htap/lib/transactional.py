@@ -57,10 +57,10 @@ class TransactionalWorker:
         self.conn.cursor.executemany(sql, args_seq)
         self.add_stats(query_type, 'ok', start, len(args_seq)) if not error else self.add_stats(query_type, 'error', start, len(args_seq))
 
-    def new_order(self, timestamp, count):
+    def new_order(self, timestamps, count):
 
         args_seq = []
-        for idx in range(1, count):
+        for idx in range(0, count-1):
             w_id = self.random.randint_inclusive(1, self.num_warehouses)
             d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
             c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
@@ -84,7 +84,7 @@ class TransactionalWorker:
 
                 qty.append(self.random.randint_inclusive(1, 10))
 
-            args = (w_id, c_id, d_id, order_line_count, all_local, itemid, supware, qty, timestamp)
+            args = (w_id, c_id, d_id, order_line_count, all_local, itemid, supware, qty, timestamps[idx])
             args_seq.append(args)
 
         sql = 'CALL new_order(%t::integer, %t::integer, %t::integer, %t::integer, %t::integer, %t::integer array, %t::integer array, %t::integer array, %t::timestamptz)'
@@ -93,10 +93,10 @@ class TransactionalWorker:
         self.new_order_count += count
         self.execute_sql(sql, args_seq, 'new_order', rbk == 1)
 
-    def payment(self, timestamp, count):
+    def payment(self, timestamps, count):
         args_seq = []
 
-        for idx in range(1, count):
+        for idx in range(0, count-1):
             w_id = self.random.randint_inclusive(1, self.num_warehouses)
             d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
             c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
@@ -111,7 +111,7 @@ class TransactionalWorker:
                 c_w_id = self.other_ware(w_id)
                 c_d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
 
-            args = (w_id, d_id, c_d_id, c_id, c_w_id, h_amount, byname, c_last, timestamp)
+            args = (w_id, d_id, c_d_id, c_id, c_w_id, h_amount, byname, c_last, timestamps[idx])
             args_seq.append(args)
 
         sql = 'CALL payment(%t, %t, %t, %t, %t, %t::numeric(12,2), %t, %t::varchar(16), %t::timestamptz)'
@@ -120,7 +120,7 @@ class TransactionalWorker:
     def order_status(self, count):
         args_seq = []
 
-        for idx in range(1, count):
+        for idx in range(0, count-1):
             w_id = self.random.randint_inclusive(1, self.num_warehouses)
             d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
             c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
@@ -133,14 +133,14 @@ class TransactionalWorker:
         sql = 'CALL order_status(%t::integer, %t::integer, %t::integer, %t::varchar(24), %t::boolean)'
         self.execute_sql(sql, args_seq, 'order_status')
 
-    def delivery(self, timestamp, count):
+    def delivery(self, timestamps, count):
         args_seq = []
 
-        for idx in range(1, count):
+        for idx in range(0, count-1):
             w_id = self.random.randint_inclusive(1, self.num_warehouses)
             o_carrier_id = self.random.randint_inclusive(1, 10)
 
-            args = (w_id, o_carrier_id, DIST_PER_WARE, timestamp)
+            args = (w_id, o_carrier_id, DIST_PER_WARE, timestamps[idx])
             args_seq.append(args)
 
         sql = 'CALL delivery(%t, %t, %t, %t::timestamptz)'
@@ -149,7 +149,7 @@ class TransactionalWorker:
     def stock_level(self, count):
         args_seq = []
 
-        for idx in range(1, count):
+        for idx in range(0, count-1):
             w_id = self.random.randint_inclusive(1, self.num_warehouses)
             d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
             level = self.random.randint_inclusive(10, 20)
@@ -161,17 +161,19 @@ class TransactionalWorker:
         self.execute_sql(sql, args_seq, 'stock_level')
 
     def next_transaction(self):
-        timestamp_to_use = self.timestamp_generator.next()
-        count = 10
+        count = 100
+        timestamps_to_use = []
+        for idx in range(1, count):
+            timestamps_to_use.append(self.timestamp_generator.next())
         # WARNING: keep in sync with initialization of scalar of timestamp generator!
         trx_type = self.random.randint_inclusive(1, 23)
         if trx_type <= 10:
-            self.new_order(timestamp_to_use, count)
+            self.new_order(timestamps_to_use, count)
         elif trx_type <= 20:
-            self.payment(timestamp_to_use, count)
+            self.payment(timestamps_to_use, count)
         elif trx_type <= 21:
             self.order_status(count)
         elif trx_type <= 22:
-            self.delivery(timestamp_to_use, count)
+            self.delivery(timestamps_to_use, count)
         elif trx_type <= 23:
             self.stock_level(count)
