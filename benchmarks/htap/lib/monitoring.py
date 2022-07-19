@@ -6,6 +6,7 @@ from benchmarks.htap.lib.analytical import QUERY_IDS
 from benchmarks.htap.lib.helpers import WAREHOUSES_SF_RATIO
 from benchmarks.htap.lib.stats import QUERY_TYPES
 
+
 class Monitor:
     def __init__(self, stats, num_oltp_workers, num_olap_workers, num_warehouses, min_timestamp):
         self.stats = stats
@@ -33,7 +34,7 @@ class Monitor:
         print()
         summary = 'Summary'
         print(f'{summary}\n' + len(summary) * '-')
-        print(f'Scale factor: {self.num_warehouses // WAREHOUSES_SF_RATIO }')
+        print(f'Scale factor: {self.num_warehouses // WAREHOUSES_SF_RATIO}')
         print(f'Workers: {self.num_oltp_workers} OLTP, {self.num_olap_workers} OLAP')
 
         htap_time = elapsed - burnin_duration
@@ -49,12 +50,13 @@ class Monitor:
             tps, latency = self.stats.oltp_total(query_type)
             rows.append([query_type, f'{tps[2]:.2f}', f'{latency[2]:.2f}'])
         history_length = self.stats.get_history_length()
-        print(tabulate(rows, headers=['', f'Average transactions per second (last {history_length}s)',  f'Average latency (last {history_length}s, in ms)']))
+        print(tabulate(rows, headers=['', f'Average transactions per second (last {history_length}s)',
+                                      f'Average latency (last {history_length}s, in ms)']))
         print('')
         print(f'OLAP')
         rows = []
         avg_stream_runtime, n_streams = self.stats.olap_stream_totals()
-        rows.append(['Average stream runtime (s)', avg_stream_runtime],)
+        rows.append(['Average stream runtime (s)', avg_stream_runtime], )
         rows.append(['Completed stream iterations', n_streams])
         num_ok, num_errors, num_timeouts = self.stats.olap_totals()
         rows.append(['Successful queries', num_ok])
@@ -63,13 +65,13 @@ class Monitor:
         print(tabulate(rows))
         # TODO output average query runtime per query type
 
-    def get_oltp_row(self, query_type = None):
+    def get_oltp_row(self, query_type=None):
         ok, err = self.stats.oltp_counts(query_type)
         tps, latency = self.stats.oltp_total(query_type)
-        tps     = '{:5} | {:5} | {:5} | {:5}'.format(*tps)
+        tps = '{:5} | {:5} | {:5} | {:5}'.format(*tps)
         latency = '{:5} | {:5} | {:5} | {:5}'.format(*latency)
         name = 'All types' if query_type == None else query_type
-        return f'| {name:^12} | {ok+err:8} | {ok:10} | {err:6} | {tps} | {latency} |'
+        return f'| {name:^12} | {ok + err:8} | {ok:10} | {err:6} | {tps} | {latency} |'
 
     def get_olap_header(self):
         olap_header = f'{"Stream":<8} |'
@@ -85,8 +87,8 @@ class Monitor:
             stats = self.stats.olap_stats_for_stream_id(stream_id).get('queries').get(query_id)
             if stats and stats['runtime'] > 0:
                 # output last result
-                max_planned = max(max_planned, int(stats['planned_rows']/1000))
-                max_processed = max(max_processed, int(stats['processed_rows']/1000))
+                max_planned = max(max_planned, int(stats['planned_rows'] / 1000))
+                max_processed = max(max_processed, int(stats['processed_rows'] / 1000))
                 row += '{:7.2f} {:3}|'.format(stats['runtime'], stats['status'][:3].upper())
             elif stats:
                 # output a state
@@ -122,12 +124,17 @@ class Monitor:
         self._add_display_line('')
         self._add_display_line('OLTP workload status')
         history_length = self.stats.get_history_length()
-        self._add_display_line('|     TYPE     |  ISSUED  |  COMPLETED | ERRORS |         TPS (last {}s)        |   LATENCY (last {}s, in ms)   |'.format(history_length, history_length))
-        self._add_display_line('|              |          |            |        |  LAST |  MIN  |  AVG  |  MAX  |  LAST |  MIN  |  AVG  |  MAX  |')
-        self._add_display_line('|---------------------------------------------------------------------------------------------------------------|')
+        self._add_display_line(
+            '|     TYPE     |  ISSUED  |  COMPLETED | ERRORS |         TPS (last {}s)        |   LATENCY (last {}s, in ms)   |'.format(
+                history_length, history_length))
+        self._add_display_line(
+            '|              |          |            |        |  LAST |  MIN  |  AVG  |  MAX  |  LAST |  MIN  |  AVG  |  MAX  |')
+        self._add_display_line(
+            '|---------------------------------------------------------------------------------------------------------------|')
         for query_type in QUERY_TYPES:
             self._add_display_line(self.get_oltp_row(query_type))
-        self._add_display_line('|---------------------------------------------------------------------------------------------------------------|')
+        self._add_display_line(
+            '|---------------------------------------------------------------------------------------------------------------|')
         self._add_display_line(self.get_oltp_row())
 
         if self.num_olap_workers > 0:
@@ -147,12 +154,14 @@ class Monitor:
         latest_time = latest_timestamp.date()
         date_range = relativedelta(latest_time, self.min_timestamp)
         data_warning = "(not enough for consistent OLAP queries)" if date_range.years < 7 else ""
-        self._add_display_line(f'Phase: {phase} | Data range: {self.min_timestamp} - {latest_time} = {date_range.years} years, {date_range.months} months and {date_range.days} days {data_warning}')
+        self._add_display_line(
+            f'Phase: {phase} | Data range: {self.min_timestamp} - {latest_time} = {date_range.years} years, {date_range.months} months and {date_range.days} days {data_warning}')
 
         htap_time = 0
         if burnin_duration == None:
             burnin_duration = elapsed
         else:
             htap_time = (elapsed - burnin_duration).total_seconds()
-        self._add_display_line(f'Time elapsed: {elapsed.total_seconds():.0f}s | Burn-in: {burnin_duration.total_seconds():.0f}s | HTAP: {htap_time:.0f}s')
+        self._add_display_line(
+            f'Time elapsed: {elapsed.total_seconds():.0f}s | Burn-in: {burnin_duration.total_seconds():.0f}s | HTAP: {htap_time:.0f}s')
         self._print()

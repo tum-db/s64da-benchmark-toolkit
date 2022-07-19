@@ -1,4 +1,3 @@
-
 from unittest.mock import call
 
 import psycopg2
@@ -7,16 +6,18 @@ import json
 
 from s64da_benchmark_toolkit import db
 
-
 DSN = 'postgresql://postgres@nowhere:1234/foodb'
 DSN_PG = 'postgresql://postgres@nowhere:1234/postgres'
+
 
 def get_mocked_conn(mocker):
     psycopg2_connect = mocker.patch('psycopg2.connect')
     return psycopg2_connect.return_value
 
+
 def get_mocked_cursor(mocker):
     return get_mocked_conn(mocker).cursor.return_value
+
 
 @pytest.fixture
 def no_plan(monkeypatch):
@@ -89,9 +90,10 @@ def test_db_run_query_error(no_plan, mocker):
     assert query_output is None
     mock_cursor.execute.assert_called_once_with('SELECT 1')
 
+
 def test_get_explain_output_json_error(mocker):
     mocker_conn = get_mocked_conn(mocker)
     mocker_json = mocker.patch('json.dumps')
     mocker_json.side_effect = json.decoder.JSONDecodeError('Test invalid explain plan', '', 255)
     plan = db.DB(DSN).get_explain_output(mocker_conn, 'EXPLAIN JSON SELECT 1')
-    assert plan ==  f'Explain Output failed with a JSON Decode Error: Test invalid explain plan: line 1 column 256 (char 255)'
+    assert plan == f'Explain Output failed with a JSON Decode Error: Test invalid explain plan: line 1 column 256 (char 255)'

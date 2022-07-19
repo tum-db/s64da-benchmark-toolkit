@@ -6,6 +6,7 @@ from collections import deque
 from .helpers import Random, OLTPText, TimestampGenerator
 from .helpers import MAX_ITEMS, DIST_PER_WARE, CUST_PER_DIST, NUM_ORDERS, STOCKS, NAMES
 
+
 class TransactionalWorker:
     def __init__(self, seed, num_warehouses, latest_timestamp, conn, dry_run):
         self.conn = conn
@@ -19,10 +20,10 @@ class TransactionalWorker:
         # here we generate a tsx for any warehouse and therefore have to scale
         # for both: 10/23 and warehouse-count. the 10/23 comes from next_transaction
         # and is the ratio between calls to new_order() and timestamp_generator.next()
-        timestamp_scalar = (10/23.0) / self.num_warehouses
+        timestamp_scalar = (10 / 23.0) / self.num_warehouses
 
         self.timestamp_generator = TimestampGenerator(
-                latest_timestamp, self.random, timestamp_scalar
+            latest_timestamp, self.random, timestamp_scalar
         )
         self.ok_count = 0
         self.err_count = 0
@@ -159,14 +160,12 @@ class TransactionalWorker:
         # WARNING: keep in sync with initialization of scalar of timestamp generator!
         trx_type = self.random.randint_inclusive(1, 23)
         if trx_type <= 10:
-                self.new_order(timestamp_to_use)
+            self.new_order(timestamp_to_use)
         elif trx_type <= 20:
-                self.payment(timestamp_to_use)
+            self.payment(timestamp_to_use)
         elif trx_type <= 21:
-                self.order_status()
+            self.order_status()
         elif trx_type <= 22:
-                self.delivery(timestamp_to_use)
+            self.delivery(timestamp_to_use)
         elif trx_type <= 23:
-                self.stock_level()
-
-        
+            self.stock_level()

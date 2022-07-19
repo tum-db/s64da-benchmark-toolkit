@@ -10,7 +10,6 @@ from natsort import natsorted
 LOG = logging.getLogger()
 
 
-    
 class Netdata:
     def __init__(self, config):
         self.url = f"{config['url']}/api/v1/data"

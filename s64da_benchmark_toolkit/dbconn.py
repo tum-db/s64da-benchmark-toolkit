@@ -1,4 +1,3 @@
-
 import logging
 import time
 
@@ -9,7 +8,7 @@ LOG = logging.getLogger()
 
 
 class DBConn:
-    def __init__(self, dsn, statement_timeout=0, num_retries=120, retry_wait=1, use_dict_cursor = False):
+    def __init__(self, dsn, statement_timeout=0, num_retries=120, retry_wait=1, use_dict_cursor=False):
         self.dsn = dsn
         self.conn = None
         self.cursor = None
@@ -26,7 +25,7 @@ class DBConn:
             try:
                 self.conn = psycopg2.connect(self.dsn, options=options)
                 self.conn.autocommit = True
-                self.cursor = self.conn.cursor(cursor_factory = DictCursor if self.use_dict_cursor else None)
+                self.cursor = self.conn.cursor(cursor_factory=DictCursor if self.use_dict_cursor else None)
                 self.server_side_cursor = self.conn.cursor('server-side-cursor')
                 break
 

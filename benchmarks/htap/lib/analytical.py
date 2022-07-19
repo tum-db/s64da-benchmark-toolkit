@@ -18,15 +18,15 @@ from s64da_benchmark_toolkit.db import Status, DB, Timing
 TEMPLATE_DIR = path.join('benchmarks', 'htap', 'queries')
 
 QUERY_TEMPLATES = {
-     1: Template(open(path.join(TEMPLATE_DIR, '01.sql.template'), 'r').read()),
-     2: Template(open(path.join(TEMPLATE_DIR, '02.sql.template'), 'r').read()),
-     3: Template(open(path.join(TEMPLATE_DIR, '03.sql.template'), 'r').read()),
-     4: Template(open(path.join(TEMPLATE_DIR, '04.sql.template'), 'r').read()),
-     5: Template(open(path.join(TEMPLATE_DIR, '05.sql.template'), 'r').read()),
-     6: Template(open(path.join(TEMPLATE_DIR, '06.sql.template'), 'r').read()),
-     7: Template(open(path.join(TEMPLATE_DIR, '07.sql.template'), 'r').read()),
-     8: Template(open(path.join(TEMPLATE_DIR, '08.sql.template'), 'r').read()),
-     9: Template(open(path.join(TEMPLATE_DIR, '09.sql.template'), 'r').read()),
+    1: Template(open(path.join(TEMPLATE_DIR, '01.sql.template'), 'r').read()),
+    2: Template(open(path.join(TEMPLATE_DIR, '02.sql.template'), 'r').read()),
+    3: Template(open(path.join(TEMPLATE_DIR, '03.sql.template'), 'r').read()),
+    4: Template(open(path.join(TEMPLATE_DIR, '04.sql.template'), 'r').read()),
+    5: Template(open(path.join(TEMPLATE_DIR, '05.sql.template'), 'r').read()),
+    6: Template(open(path.join(TEMPLATE_DIR, '06.sql.template'), 'r').read()),
+    7: Template(open(path.join(TEMPLATE_DIR, '07.sql.template'), 'r').read()),
+    8: Template(open(path.join(TEMPLATE_DIR, '08.sql.template'), 'r').read()),
+    9: Template(open(path.join(TEMPLATE_DIR, '09.sql.template'), 'r').read()),
     10: Template(open(path.join(TEMPLATE_DIR, '10.sql.template'), 'r').read()),
     11: Template(open(path.join(TEMPLATE_DIR, '11.sql.template'), 'r').read()),
     12: Template(open(path.join(TEMPLATE_DIR, '12.sql.template'), 'r').read()),
@@ -43,6 +43,7 @@ QUERY_TEMPLATES = {
 }
 
 QUERY_IDS = sorted(QUERY_TEMPLATES.keys())
+
 
 def is_ignored_query(ignored_queries, query_id):
     return (str(query_id) in ignored_queries)
@@ -73,35 +74,35 @@ class AnalyticalStream:
 
     def _query_args(self, query_id):
         if query_id == 1:
-            return {'date': isoparse('1998-09-22')} # 1998-12-01 - 70 days
+            return {'date': isoparse('1998-09-22')}  # 1998-12-01 - 70 days
         elif query_id == 3:
             return {'date': isoparse('1995-03-07')}
         elif query_id == 4:
-            return {'begin_date': isoparse('1994-01-01'), 
+            return {'begin_date': isoparse('1994-01-01'),
                     'end_date': isoparse('1994-04-01')}
         elif query_id == 5:
-            return {'begin_date': isoparse('1993-01-01'), 
+            return {'begin_date': isoparse('1993-01-01'),
                     'end_date': isoparse('1994-01-01')}
         elif query_id == 6:
-            return {'begin_date': isoparse('1993-01-01'), 
+            return {'begin_date': isoparse('1993-01-01'),
                     'end_date': isoparse('1994-01-01')}
         elif query_id == 7 or query_id == 8:
-            return {'begin_date': isoparse('1995-01-01'), 
+            return {'begin_date': isoparse('1995-01-01'),
                     'end_date': isoparse('1996-12-31')}
         elif query_id == 10:
-            return {'begin_date': isoparse('1993-07-01'), 
+            return {'begin_date': isoparse('1993-07-01'),
                     'end_date': isoparse('1993-10-01')}
         elif query_id == 12:
-            return {'begin_date': isoparse('1996-01-01'), 
+            return {'begin_date': isoparse('1996-01-01'),
                     'end_date': isoparse('1997-01-01')}
         elif query_id == 14:
-            return {'begin_date': isoparse('1996-01-01'), 
+            return {'begin_date': isoparse('1996-01-01'),
                     'end_date': isoparse('1996-02-01')}
         elif query_id == 15:
-            return {'begin_date': isoparse('1995-10-01'), 
+            return {'begin_date': isoparse('1995-10-01'),
                     'end_date': isoparse('1996-01-01')}
         elif query_id == 20:
-            return {'begin_date': isoparse('1994-01-01'), 
+            return {'begin_date': isoparse('1994-01-01'),
                     'end_date': isoparse('1995-04-01')}
         else:
             return {}
@@ -136,7 +137,6 @@ class AnalyticalStream:
                 planned += planned_child
                 processed += processed_child
         return (planned, processed)
-
 
     def run_next_query(self):
 
@@ -174,8 +174,8 @@ class AnalyticalStream:
         if not self.args.dry_run:
             db = DB(self.dsn)
             timing, _, plan = DB(self.dsn).run_query(
-                    sql, self.args.olap_timeout,
-                    self.args.explain_analyze, self.args.use_server_side_cursors)
+                sql, self.args.olap_timeout,
+                self.args.explain_analyze, self.args.use_server_side_cursors)
             runtime = timing.stop - timing.start
             # sum up rows processed
             try:
@@ -198,7 +198,7 @@ class AnalyticalStream:
             _report_if_last_query()
 
             # save plan output
-            plan_file =  f'{self.stream_id}_{iteration}_{query_id}.txt'
+            plan_file = f'{self.stream_id}_{iteration}_{query_id}.txt'
             plan_dir = f'results/query_plans'
             os.makedirs(plan_dir, exist_ok=True)
             with open(f'{plan_dir}/{plan_file}', 'w') as f:

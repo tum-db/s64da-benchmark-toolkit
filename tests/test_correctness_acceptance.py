@@ -1,11 +1,9 @@
-
 import pytest
 import pandas
 
 from io import StringIO
 
 from s64da_benchmark_toolkit.correctness import Correctness, ResultDetail
-
 
 # Acceptance test for correctness checking
 
@@ -25,7 +23,7 @@ CSV_BASE = '''cnt,state,value
 2420,TX,1024
 -1,FOO,9999999999.139413000000000000000000000000001'''
 
-CSV_ERRORS_IDX = [3, 4, 8] # after sorting
+CSV_ERRORS_IDX = [3, 4, 8]  # after sorting
 CSV_ERRORS = '''cnt,state,value
 20,HI,1.0
 45,RI,
@@ -74,7 +72,6 @@ CSV_WITHIN_PRECISION = '''cnt,state,value
 1055,KS,
 2420,TX,1024
 -1,FOO,9999999999.141413000000000000000000000000001'''
-
 
 ROWS_TO_DROP = [6, 8]
 COLUMNS_TO_DROP = ['state']
@@ -150,6 +147,7 @@ def test_tpch_precision(correctness):
     result_detail, mismatch_idx = correctness._check_correctness_impl(truth, result)
     assert result_detail == ResultDetail.OK
     assert mismatch_idx == None
+
 
 def test_tpch_precision_big_numbers(correctness):
     truth = pandas.DataFrame([[326663512979.5298]])
@@ -428,4 +426,3 @@ Women,2001,2,5579227.675000000000,2986084.99,3556172.43,3192346.92
 
     assert result_detail == ResultDetail.OK
     assert mismatch_idx == None
-

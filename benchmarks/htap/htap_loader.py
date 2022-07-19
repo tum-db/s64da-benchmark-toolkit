@@ -6,15 +6,16 @@ from psycopg2.extras import execute_values
 from s64da_benchmark_toolkit.dbconn import DBConn
 
 from benchmarks.htap.lib.helpers import (
-        Random, OLTPText, OLAPText, NATIONS, REGIONS, TimestampGenerator, StringIteratorIO,
-        DIST_PER_WARE, CUST_PER_DIST, NUM_ORDERS, MAX_ITEMS, STOCKS,
-        NUM_SUPPLIERS, NUM_NATIONS, NUM_REGIONS, FIRST_UNPROCESSED_O_ID, TPCH_DATE_RANGE
+    Random, OLTPText, OLAPText, NATIONS, REGIONS, TimestampGenerator, StringIteratorIO,
+    DIST_PER_WARE, CUST_PER_DIST, NUM_ORDERS, MAX_ITEMS, STOCKS,
+    NUM_SUPPLIERS, NUM_NATIONS, NUM_REGIONS, FIRST_UNPROCESSED_O_ID, TPCH_DATE_RANGE
 )
 
-COPY_SIZE=16384
+COPY_SIZE = 16384
+
 
 class Loader():
-    def __init__(self, dsn, warehouse_id = 0, start_date=None):
+    def __init__(self, dsn, warehouse_id=0, start_date=None):
         self.dsn = dsn
         self.warehouse_id = warehouse_id
         self.random = Random(seed=warehouse_id)
@@ -26,8 +27,8 @@ class Loader():
         # calculate delivery date offset. we scale the delivery date to be at the end of the
         # date range, because we only deliver the first FIRST_UNPROCESSED_O_ID items, but when
         # we start running the benchmark we start at the end of the time range
-        fraction_delivered = (FIRST_UNPROCESSED_O_ID-1) / NUM_ORDERS
-        self.delivery_offset = (TPCH_DATE_RANGE[1] - TPCH_DATE_RANGE[0]) * (1-fraction_delivered)
+        fraction_delivered = (FIRST_UNPROCESSED_O_ID - 1) / NUM_ORDERS
+        self.delivery_offset = (TPCH_DATE_RANGE[1] - TPCH_DATE_RANGE[0]) * (1 - fraction_delivered)
 
     def insert_data(self, table, data):
         with DBConn(self.dsn) as conn:
@@ -56,19 +57,19 @@ class Loader():
     def load_warehouse(self):
         print(f'Loading warehouse ({self.warehouse_id})')
         self.insert_data(
-                'warehouse', [
-                        [
-                                self.warehouse_id,
-                                self.oltp_text.string(5, prefix='name-'),
-                                self.oltp_text.string(10, prefix='street1-'),
-                                self.oltp_text.string(10, prefix='street2-'),
-                                self.oltp_text.string(10, prefix='city-'),
-                                self.oltp_text.state(),
-                                self.oltp_text.numstring(5, prefix='zip-'),
-                                self.random.sample() * 0.2,
-                                300000,
-                        ],
-                ]
+            'warehouse', [
+                [
+                    self.warehouse_id,
+                    self.oltp_text.string(5, prefix='name-'),
+                    self.oltp_text.string(10, prefix='street1-'),
+                    self.oltp_text.string(10, prefix='street2-'),
+                    self.oltp_text.string(10, prefix='city-'),
+                    self.oltp_text.state(),
+                    self.oltp_text.numstring(5, prefix='zip-'),
+                    self.random.sample() * 0.2,
+                    300000,
+                ],
+            ]
         )
 
     def generate_district(self, d_id):
@@ -94,7 +95,6 @@ class Loader():
                 for d_id in range(1, DIST_PER_WARE + 1)
             ))
             conn.cursor.copy_from(it, 'district', null='None', size=COPY_SIZE)
-
 
     def generate_customer(self, d_id, c_id):
         c_last = self.oltp_text.lastname(c_id - 1) if c_id < 1000 else \
@@ -136,7 +136,7 @@ class Loader():
 
     def load_history(self):
         print(f'Loading history ({self.warehouse_id})')
-        copy_columns=('h_c_id', 'h_c_d_id', 'h_c_w_id', 'h_d_id', 'h_w_id', 'h_date', 'h_amount', 'h_data')
+        copy_columns = ('h_c_id', 'h_c_d_id', 'h_c_w_id', 'h_d_id', 'h_w_id', 'h_date', 'h_amount', 'h_data')
 
         with DBConn(self.dsn) as conn:
             it = StringIteratorIO((
@@ -182,7 +182,7 @@ class Loader():
             self.random.randint_inclusive(1, 10) if o_id < FIRST_UNPROCESSED_O_ID else None,
             o_ol_cnt, 1
         ])
-    
+
     def generate_order_lines(self, order_line):
         d_id, o_id, order_line_count, entry_date = order_line
         rows = ""
@@ -218,9 +218,8 @@ class Loader():
                 INSERT INTO new_orders(no_o_id, no_d_id, no_w_id)
                 SELECT o_id, o_d_id, o_w_id
                 FROM orders
-                WHERE o_id >= {FIRST_UNPROCESSED_O_ID} AND o_w_id = { self.warehouse_id }'''
+                WHERE o_id >= {FIRST_UNPROCESSED_O_ID} AND o_w_id = {self.warehouse_id}'''
             )
-
 
         print(f'Loading order_line ({self.warehouse_id})')
         with DBConn(self.dsn) as conn:

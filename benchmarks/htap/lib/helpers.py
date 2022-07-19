@@ -48,80 +48,80 @@ NAMES = ['BAR', 'OUGHT', 'ABLE', 'PRI', 'PRES', 'ESE', 'ANTI', 'CALLY', 'ATION',
 # yapf: disable
 NATIONS = [
     # nation key, name, region key
-    (48, 'Australia', 4),         (49, 'Belgium', 5),            (50, 'Cameroon', 1),
-    (51, 'Denmark', 5),           (52, 'Equador', 2),            (53, 'France', 5),
-    (54, 'Germany', 5),           (55, 'Hungary', 5),            (56, 'Italy', 5),
+    (48, 'Australia', 4), (49, 'Belgium', 5), (50, 'Cameroon', 1),
+    (51, 'Denmark', 5), (52, 'Equador', 2), (53, 'France', 5),
+    (54, 'Germany', 5), (55, 'Hungary', 5), (56, 'Italy', 5),
     (57, 'Japan', 3),
 
-    (65, 'Kenya', 1),             (66, 'Lithuania', 5),          (67, 'Mexico', 2),
-    (68, 'Netherlands', 5),       (69, 'Oman', 1),               (70, 'Portugal', 5),
-    (71, 'Qatar', 1),             (72, 'Rwanda', 1),             (73, 'Serbia', 5),
-    (74, 'Togo', 1),              (75, 'United States', 2),      (76, 'Vietnam', 3),
-    (77, 'Singapore', 3),         (78, 'Cambodia', 3),           (79, 'Yemen', 1),
-    (80, 'Zimbabwe', 1),          (81, 'Argentina', 2),          (82, 'Bolivia', 2),
-    (83, 'Canada', 2),            (84, 'Dominican Republic', 2), (85, 'Egypt', 1),
-    (86, 'Finland', 5),           (87, 'Ghana', 1),              (88, 'Haiti', 2),
-    (89, 'India', 3),             (90, 'Jamaica', 4),
+    (65, 'Kenya', 1), (66, 'Lithuania', 5), (67, 'Mexico', 2),
+    (68, 'Netherlands', 5), (69, 'Oman', 1), (70, 'Portugal', 5),
+    (71, 'Qatar', 1), (72, 'Rwanda', 1), (73, 'Serbia', 5),
+    (74, 'Togo', 1), (75, 'United States', 2), (76, 'Vietnam', 3),
+    (77, 'Singapore', 3), (78, 'Cambodia', 3), (79, 'Yemen', 1),
+    (80, 'Zimbabwe', 1), (81, 'Argentina', 2), (82, 'Bolivia', 2),
+    (83, 'Canada', 2), (84, 'Dominican Republic', 2), (85, 'Egypt', 1),
+    (86, 'Finland', 5), (87, 'Ghana', 1), (88, 'Haiti', 2),
+    (89, 'India', 3), (90, 'Jamaica', 4),
 
-    ( 97, 'Kazakhstan', 3),       ( 98, 'Luxemburg', 5),         ( 99, 'Marocco', 1),
-    (100, 'Norway', 5),           (101, 'Poland', 5),            (102, 'Peru', 2),
-    (103, 'Nicaragua', 2),        (104, 'Romania', 5),           (105, 'South Africa', 1),
-    (106, 'Thailand', 3),         (107, 'United Kingdom', 5),    (108, 'Venezuela', 2),
-    (109, 'Liechtenstein', 5),    (110, 'Austria', 5),           (111, 'Laos', 3),
-    (112, 'Zambia', 1),           (113, 'Switzerland', 5),       (114, 'China', 3),
-    (115, 'Papua New Guinea', 4), (116, 'East Timor', 4),        (117, 'Bulgaria', 5),
-    (118, 'Brazil', 2),           (119, 'Albania', 5),           (120, 'Andorra', 5),
-    (121, 'Belize', 2),           (122, 'Botswana', 1),
+    (97, 'Kazakhstan', 3), (98, 'Luxemburg', 5), (99, 'Marocco', 1),
+    (100, 'Norway', 5), (101, 'Poland', 5), (102, 'Peru', 2),
+    (103, 'Nicaragua', 2), (104, 'Romania', 5), (105, 'South Africa', 1),
+    (106, 'Thailand', 3), (107, 'United Kingdom', 5), (108, 'Venezuela', 2),
+    (109, 'Liechtenstein', 5), (110, 'Austria', 5), (111, 'Laos', 3),
+    (112, 'Zambia', 1), (113, 'Switzerland', 5), (114, 'China', 3),
+    (115, 'Papua New Guinea', 4), (116, 'East Timor', 4), (117, 'Bulgaria', 5),
+    (118, 'Brazil', 2), (119, 'Albania', 5), (120, 'Andorra', 5),
+    (121, 'Belize', 2), (122, 'Botswana', 1),
 ]
 # yapf: enable
 
 REGIONS = [(1, 'Africa'), (2, 'America'), (3, 'Asia'), (4, 'Australia'), (5, 'Europe')]
 
 NOUNS = [
-        'foxes', 'ideas', 'theodolites', 'pinto beans', 'instructions', 'dependencies', 'excuses',
-        'platelets', 'asymptotes', 'courts', 'dolphins', 'multipliers', 'sauternes', 'warthogs',
-        'frets', 'dinos', 'attainments', 'somas', 'Tiresias', 'patterns', 'forges', 'braids',
-        'hockey players', 'frays', 'warhorses', 'dugouts', 'notornis', 'epitaphs', 'pearls',
-        'tithes', 'waters', 'orbits', 'gifts', 'sheaves', 'depths', 'sentiments', 'decoys',
-        'realms', 'pains', 'grouches', 'escapades'
+    'foxes', 'ideas', 'theodolites', 'pinto beans', 'instructions', 'dependencies', 'excuses',
+    'platelets', 'asymptotes', 'courts', 'dolphins', 'multipliers', 'sauternes', 'warthogs',
+    'frets', 'dinos', 'attainments', 'somas', 'Tiresias', 'patterns', 'forges', 'braids',
+    'hockey players', 'frays', 'warhorses', 'dugouts', 'notornis', 'epitaphs', 'pearls',
+    'tithes', 'waters', 'orbits', 'gifts', 'sheaves', 'depths', 'sentiments', 'decoys',
+    'realms', 'pains', 'grouches', 'escapades'
 ]
 
 VERBS = [
-        'sleep', 'wake', 'are', 'cajole', 'haggle', 'nag', 'use', 'boost', 'affix', 'detect',
-        'integrate', 'maintain', 'nod', 'was', 'lose', 'sublate', 'solve', 'thrash', 'promise',
-        'engage', 'hinder', 'print', 'x-ray', 'breach', 'eat', 'grow', 'impress', 'mold', 'poach',
-        'serve', 'run', 'dazzle', 'snooze', 'doze', 'unwind', 'kindle', 'play', 'hang', 'believe',
-        'doubt'
+    'sleep', 'wake', 'are', 'cajole', 'haggle', 'nag', 'use', 'boost', 'affix', 'detect',
+    'integrate', 'maintain', 'nod', 'was', 'lose', 'sublate', 'solve', 'thrash', 'promise',
+    'engage', 'hinder', 'print', 'x-ray', 'breach', 'eat', 'grow', 'impress', 'mold', 'poach',
+    'serve', 'run', 'dazzle', 'snooze', 'doze', 'unwind', 'kindle', 'play', 'hang', 'believe',
+    'doubt'
 ]
 
 ADJECTIVES = [
-        'furious', 'sly', 'careful', 'blithe', 'quick', 'fluffy', 'slow', 'quiet', 'ruthless',
-        'thin', 'close', 'dogged', 'daring', 'brave', 'stealthy', 'permanent', 'enticing', 'idle',
-        'busy', 'regular', 'final', 'ironic', 'even', 'bold', 'silent'
+    'furious', 'sly', 'careful', 'blithe', 'quick', 'fluffy', 'slow', 'quiet', 'ruthless',
+    'thin', 'close', 'dogged', 'daring', 'brave', 'stealthy', 'permanent', 'enticing', 'idle',
+    'busy', 'regular', 'final', 'ironic', 'even', 'bold', 'silent'
 ]
 
 ADVERBS = [
-        'sometimes', 'always', 'never', 'furiously', 'slyly', 'carefully', 'blithely', 'quickly',
-        'fluffily', 'slowly', 'quietly', 'ruthlessly', 'thinly', 'closely', 'doggedly', 'daringly',
-        'bravely', 'stealthily', 'permanently', 'enticingly', 'idly', 'busily', 'regularly',
-        'finally', 'ironically', 'evenly', 'boldly', 'silently'
+    'sometimes', 'always', 'never', 'furiously', 'slyly', 'carefully', 'blithely', 'quickly',
+    'fluffily', 'slowly', 'quietly', 'ruthlessly', 'thinly', 'closely', 'doggedly', 'daringly',
+    'bravely', 'stealthily', 'permanently', 'enticingly', 'idly', 'busily', 'regularly',
+    'finally', 'ironically', 'evenly', 'boldly', 'silently'
 ]
 
 PREPOSITIONS = [
-        'about', 'above', 'according to', 'across', 'after', 'against', 'along', 'alongside of',
-        'among', 'around', 'at', 'atop', 'before', 'behind', 'beneath', 'beside', 'besides',
-        'between', 'beyond', 'by', 'despite', 'during', 'except', 'for', 'from', 'in place of',
-        'inside', 'instead of', 'into', 'near', 'of', 'on', 'outside', 'over', 'past', 'since',
-        'through', 'throughout', 'to', 'toward', 'under', 'until', 'up', 'upon', 'without', 'with',
-        'within'
+    'about', 'above', 'according to', 'across', 'after', 'against', 'along', 'alongside of',
+    'among', 'around', 'at', 'atop', 'before', 'behind', 'beneath', 'beside', 'besides',
+    'between', 'beyond', 'by', 'despite', 'during', 'except', 'for', 'from', 'in place of',
+    'inside', 'instead of', 'into', 'near', 'of', 'on', 'outside', 'over', 'past', 'since',
+    'through', 'throughout', 'to', 'toward', 'under', 'until', 'up', 'upon', 'without', 'with',
+    'within'
 ]
 
 TERMINATORS = ['.', ';', ':', '?', '!', '--']
 
 AUXILIARIES = [
-        'do', 'may', 'might', 'shall', 'will', 'would', 'can', 'could', 'should', 'ought to',
-        'must', 'will have to', 'shall have to', 'could have to', 'should have to', 'must have to',
-        'need to', 'try to'
+    'do', 'may', 'might', 'shall', 'will', 'would', 'can', 'could', 'should', 'ought to',
+    'must', 'will have to', 'shall have to', 'could have to', 'should have to', 'must have to',
+    'need to', 'try to'
 ]
 
 WAREHOUSES_SF_RATIO = 20
@@ -252,30 +252,30 @@ class OLAPText:
     def random_sentence(self):
         if self.random.decision(1 / 5):
             return (
-                    f'{self.random_verb_phrase()} {self.random_noun_phrase()} '
-                    f'{self.random_terminator()}'
+                f'{self.random_verb_phrase()} {self.random_noun_phrase()} '
+                f'{self.random_terminator()}'
             )
         elif self.random.decision(1 / 5):
             return (
-                    f'{self.random_noun_phrase()} {self.random_verb_phrase()} '
-                    f'{self.random_prepositional_phrase()} {self.random_terminator()}'
+                f'{self.random_noun_phrase()} {self.random_verb_phrase()} '
+                f'{self.random_prepositional_phrase()} {self.random_terminator()}'
             )
         elif self.random.decision(1 / 5):
             return (
-                    f'{self.random_noun_phrase()} {self.random_verb_phrase()} '
-                    f'{self.random_noun_phrase()} {self.random_terminator()}'
+                f'{self.random_noun_phrase()} {self.random_verb_phrase()} '
+                f'{self.random_noun_phrase()} {self.random_terminator()}'
             )
         elif self.random.decision(1 / 5):
             return (
-                    f'{self.random_noun_phrase()} {self.random_prepositional_phrase()} '
-                    f'{self.random_verb_phrase()} {self.random_noun_phrase()}'
-                    f'{self.random_terminator()}'
+                f'{self.random_noun_phrase()} {self.random_prepositional_phrase()} '
+                f'{self.random_verb_phrase()} {self.random_noun_phrase()}'
+                f'{self.random_terminator()}'
             )
         else:
             return (
-                    f'{self.random_noun_phrase()} {self.random_prepositional_phrase()} '
-                    f'{self.random_verb_phrase()} {self.random_prepositional_phrase()}'
-                    f'{self.random_terminator()}'
+                f'{self.random_noun_phrase()} {self.random_prepositional_phrase()} '
+                f'{self.random_verb_phrase()} {self.random_prepositional_phrase()}'
+                f'{self.random_terminator()}'
             )
 
     def random_text(self, length):
@@ -297,7 +297,7 @@ class OLAPText:
         l2 = self.random.randint_inclusive(0, total_length - l1 - 8 - len(action))
         l3 = total_length - l1 - l2 - 8 - len(action)
         return '{}Customer{}{}{}'.format(
-                self.random_text(l1), self.random_text(l2), action, self.random_text(l3)
+            self.random_text(l1), self.random_text(l2), action, self.random_text(l3)
         )
 
     def random_phone_number(self, key):
@@ -309,7 +309,7 @@ class OLAPText:
 
 
 class TimestampGenerator:
-    def __init__(self, start_date, random, scalar = 1.0):
+    def __init__(self, start_date, random, scalar=1.0):
         # use the start date as value directly so that we can easily use shared counters
         # as well by simply feeding in the right type
         self.current = start_date
@@ -331,6 +331,7 @@ class TimestampGenerator:
         else:
             raise ValueError("Unsupported datatype for TimestampGenerator")
 
+
 # Taken from CPython 3.7 for compatibility with Python 3.6
 class nullcontext(AbstractContextManager):
     """Context manager that does no additional processing.
@@ -349,6 +350,7 @@ class nullcontext(AbstractContextManager):
 
     def __exit__(self, *excinfo):
         pass
+
 
 # from https://hakibenita.com/fast-load-data-python-postgresql
 class StringIteratorIO(io.TextIOBase):

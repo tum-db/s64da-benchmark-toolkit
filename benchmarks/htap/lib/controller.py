@@ -15,13 +15,14 @@ from benchmarks.htap.lib.stats import Stats
 from benchmarks.htap.lib.transactional import TransactionalWorker
 from s64da_benchmark_toolkit.dbconn import DBConn
 
+
 class HTAPController:
     # have the shared-memory primitives static as otherwise the multiprocessing
     # inheritance scheme doesn't work. we want these primitives so we can use
     # "simple" synchronized primitives.
-    latest_timestamp = Value('d', 0) # database record timestamp
-    next_tsx_timestamp = Value('d', 0) # rtc time at which we can do the next oltp tsx
-    stats_queue = Queue() # queue for communicating statistics
+    latest_timestamp = Value('d', 0)  # database record timestamp
+    next_tsx_timestamp = Value('d', 0)  # rtc time at which we can do the next oltp tsx
+    stats_queue = Queue()  # queue for communicating statistics
 
     def __init__(self, args):
         self.args = args
@@ -33,10 +34,11 @@ class HTAPController:
         # update the shared value to the actual last ingested timestamp
         self.latest_timestamp.value = self.range_delivery_date[1].timestamp()
         self.csv_interval = args.csv_interval if 'csv' in args.output else None
-        self.stats = Stats(self.args.dsn, self.args.oltp_workers, self.args.olap_workers, self.csv_interval, self.args.ignored_queries)
+        self.stats = Stats(self.args.dsn, self.args.oltp_workers, self.args.olap_workers, self.csv_interval,
+                           self.args.ignored_queries)
         self.monitor = Monitor(
-                self.stats, self.args.oltp_workers, self.args.olap_workers, self.num_warehouses,
-                self.range_delivery_date[0]
+            self.stats, self.args.oltp_workers, self.args.olap_workers, self.num_warehouses,
+            self.range_delivery_date[0]
         )
 
         print(f'Warehouses: {self.num_warehouses}')
@@ -53,7 +55,8 @@ class HTAPController:
         # do NOT introduce timeouts for the oltp queries! this will make that
         # the workload gets inbalanaced and eventually the whole benchmark stalls
         with DBConn(self.args.dsn) as conn:
-            oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn, self.args.dry_run)
+            oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn,
+                                              self.args.dry_run)
             next_reporting_time = time.time() + 0.1
             while True:
                 self.oltp_sleep()
@@ -63,10 +66,9 @@ class HTAPController:
                     self.stats_queue.put(('oltp', oltp_worker.stats()))
                     next_reporting_time += 0.1
 
-
     def olap_worker(self, worker_id):
         stream = AnalyticalStream(worker_id, self.args, self.range_delivery_date[0],
-                          self.latest_timestamp, self.stats_queue)
+                                  self.latest_timestamp, self.stats_queue)
         while True:
             stream.run_next_query()
 
@@ -153,7 +155,7 @@ class HTAPController:
                     update_interval = timedelta(seconds=min(self.args.monitoring_interval, self.args.csv_interval))
                     display_interval = timedelta(seconds=self.args.monitoring_interval)
                     next_display = datetime.now() + display_interval
-                    next_update  = datetime.now() + update_interval
+                    next_update = datetime.now() + update_interval
                     while True:
                         # the workers are not supposed to ever stop.
                         # so test for errors by testing for ready() and if so propagate them
@@ -170,7 +172,8 @@ class HTAPController:
                             time.sleep(0.1)
 
                         time_now = datetime.now()
-                        available_data = datetime.fromtimestamp(self.latest_timestamp.value) - self.range_delivery_date[0]
+                        available_data = datetime.fromtimestamp(self.latest_timestamp.value) - self.range_delivery_date[
+                            0]
                         if burnin_duration == None and available_data >= WANTED_RANGE:
                             burnin_duration = time_now - begin
 
@@ -183,7 +186,7 @@ class HTAPController:
                         if 'print' in self.args.output and next_display <= time_now:
                             next_display += display_interval
                             self.monitor.update_display(elapsed, burnin_duration, time_now, stats_conn,
-                                datetime.fromtimestamp(self.latest_timestamp.value))
+                                                        datetime.fromtimestamp(self.latest_timestamp.value))
                 except KeyboardInterrupt:
                     pass
                 finally:

@@ -18,9 +18,7 @@ import yaml
 from .db import DB
 from .reporting import Reporting, QueryMetric
 
-
 Benchmark = namedtuple('Benchmark', ['name', 'base_dir'])
-
 
 LOG = logging.getLogger()
 

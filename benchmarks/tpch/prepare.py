@@ -2,6 +2,7 @@ import os
 from glob import glob
 from s64da_benchmark_toolkit.prepare import PrepareBenchmarkFactory, TableGroup
 
+
 class PrepareBenchmark(PrepareBenchmarkFactory):
     PrepareBenchmarkFactory.TABLES = (TableGroup(
         'region',

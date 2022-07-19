@@ -2,6 +2,7 @@ import os
 from glob import glob
 from s64da_benchmark_toolkit.prepare import PrepareBenchmarkFactory, TableGroup
 
+
 class PrepareBenchmark(PrepareBenchmarkFactory):
     PrepareBenchmarkFactory.TABLES = (TableGroup(
         'customer_address',
@@ -68,7 +69,7 @@ class PrepareBenchmark(PrepareBenchmarkFactory):
             returns_table = table.split('_')[0] + '_returns'
             task += (f'tee >({self._stream_to_db(table)}) '
                      f'>({self._stream_to_db(returns_table)}) | '
-                     f'grep -vE "^({table}|{returns_table})" | cat') # Hide the dsdgen output from the loader output
+                     f'grep -vE "^({table}|{returns_table})" | cat')  # Hide the dsdgen output from the loader output
         else:
             task += f'{self._stream_to_db(table)}'
 
@@ -82,8 +83,8 @@ class PrepareBenchmark(PrepareBenchmarkFactory):
             return []
 
         use_chunks = (
-            self.args.chunks > 1 and self.args.scale_factor >= 100 and
-            table in ('inventory', 'web_sales', 'catalog_sales', 'store_sales')
+                self.args.chunks > 1 and self.args.scale_factor >= 100 and
+                table in ('inventory', 'web_sales', 'catalog_sales', 'store_sales')
         )
         dbgen = (f'./dsdgen -SCALE {self.args.scale_factor} -TABLE {table} '
                  f'-RNGSEED 1 -TERMINATE N -FILTER Y')

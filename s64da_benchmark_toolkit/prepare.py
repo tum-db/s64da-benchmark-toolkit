@@ -1,4 +1,3 @@
-
 import glob
 import os
 import re
@@ -23,8 +22,10 @@ from .dbconn import DBConn
 
 s64_benchmark_toolkit_root_dir = Path(os.path.abspath(__file__)).parents[1]
 
+
 class NoIngestException(Exception):
     """Exception when no rows have been inserted into the table."""
+
 
 class TableGroup:
     def __init__(self, *args):
@@ -74,7 +75,6 @@ class PrepareBenchmarkFactory:
         except ProgrammingError:
             return None
 
-
     def psql_exec_file(self, filename):
         return f'psql {self.args.dsn} -f {filename}'
 
@@ -87,7 +87,6 @@ class PrepareBenchmarkFactory:
             cnt = int(output.strip().split()[1])
             if cnt == 0:
                 raise NoIngestException("Ingest failed.")
-
 
     def _run_shell_task(self, task, return_output=False):
         if not self.cancel_event.is_set():
@@ -148,10 +147,10 @@ class PrepareBenchmarkFactory:
                         print(f'Task threw an exception: {exc}')
                         print_tb(exc.__traceback__)
                     if exc or ingest_failed:
-                            for future in futures:
-                                future.cancel()
-                            print('Ingest failed!')
-                            exit(1)
+                        for future in futures:
+                            future.cancel()
+                        print('Ingest failed!')
+                        exit(1)
 
     def _check_diskspace(self, diskpace_check_dir):
         db_type = os.path.basename(self.schema_dir).split('_')[0]
@@ -174,7 +173,7 @@ class PrepareBenchmarkFactory:
         _, _, free = shutil.disk_usage(diskpace_check_dir)
         space_needed = int(scale_factor * size_factor) << 30
         assert space_needed < free, \
-            f'Not enough disk space available. Needed [GBytes]: {space_needed>>30}, free: {free>>30}'
+            f'Not enough disk space available. Needed [GBytes]: {space_needed >> 30}, free: {free >> 30}'
 
     def run(self):
         diskpace_check_dir = self.args.check_diskspace_of_directory
@@ -220,7 +219,6 @@ class PrepareBenchmarkFactory:
             prepare_metrics_file.write(f'ingest; {ingest_duration}\n')
             prepare_metrics_file.write(f'optimize; {optimize_duration}')
 
-
         print(f'Process complete. DSN: {self.args.dsn}')
 
     def _load_pre_schema(self, conn):
@@ -230,7 +228,6 @@ class PrepareBenchmarkFactory:
             with open(pre_schema_path, 'r') as pre_schema_file:
                 conn.cursor.execute(pre_schema_file.read())
 
-    
     def _load_schema(self, conn, applied_schema_path):
         print(f'Loading schema {applied_schema_path}')
         with open(applied_schema_path, 'r') as schema:
@@ -246,7 +243,6 @@ class PrepareBenchmarkFactory:
             conn.cursor.execute(f'DROP DATABASE IF EXISTS {dbname}')
             print(f'Creating Database {dbname}')
             conn.cursor.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'UTF-8'")
-
 
         applied_schema_path = os.path.join(s64_benchmark_toolkit_root_dir, 'applied_schema.sql')
 
@@ -300,7 +296,6 @@ class PrepareBenchmarkFactory:
         # WARNING: do NOT run vacuum and analyze at the same time because analyze stops as soon as it cannot take the lock...
         self._run_tasks_parallel(vacuum_tasks)
         self._run_tasks_parallel(analyze_tasks)
-
 
     def update_all_columnstores(self):
         version = self.swarm64da_version

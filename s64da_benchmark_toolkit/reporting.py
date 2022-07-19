@@ -1,4 +1,3 @@
-
 import logging
 import os
 
@@ -15,7 +14,6 @@ from tabulate import tabulate
 
 from .correctness import Correctness, CorrectnessResult
 from .netdata import Netdata
-
 
 LOG = logging.getLogger()
 
@@ -44,7 +42,7 @@ class QueryMetric:
         return pandas.DataFrame(data=[[
             self.stream_id, self.query_id, self.timestamp_start,
             self.timestamp_stop, runtime, self.status
-        ],], columns=QueryMetric.dataframe_columns)
+        ], ], columns=QueryMetric.dataframe_columns)
 
 
 class Reporting:
@@ -169,8 +167,8 @@ class Reporting:
             with open(self.html_output, 'w') as html_output_file:
                 html_output_file.write(f'''
 <h1>Swarm64 Benchmark Results Report</h1>
-<p>{ report_datetime }</p>
-<p>Total runtime: { self.total_runtime_seconds }s</p>\n''')
+<p>{report_datetime}</p>
+<p>Total runtime: {self.total_runtime_seconds}s</p>\n''')
                 self.df.to_html(buf=html_output_file, escape=False, formatters={
                     'correctness_check': lambda v: v.to_html()
                 })

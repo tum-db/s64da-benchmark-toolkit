@@ -1,4 +1,3 @@
-
 import pytest
 from tests.test_db import no_plan
 from s64da_benchmark_toolkit import streams
@@ -58,10 +57,12 @@ def test_make_config_default_config_file(mocker, args, benchmark):
     yaml_mock.assert_called_once()
     assert 'timeout' not in obj.config
 
+
 def test_default_config_values(mocker, args, benchmark):
     obj = streams.Streams(args, benchmark)
 
-    assert 'timeout','ignore' in obj.config
+    assert 'timeout', 'ignore' in obj.config
+
 
 def test_make_config_file_present(mocker, args, benchmark):
     mocker.patch('builtins.open', mocker.mock_open())
@@ -112,11 +113,11 @@ def test_make_run_args(args, benchmark, reporting_queue):
 def test_get_stream_sequence(mocker, args, benchmark):
     open_patched = mocker.patch('builtins.open', mocker.mock_open(read_data=''))
     mocker.patch('yaml.load', return_value={
-        0 : [0, 1, 2],
-        1 : [1, 2, 0],
-        2 : [2, 1, 0],
-        3 : [1, 0, 2]
-        })
+        0: [0, 1, 2],
+        1: [1, 2, 0],
+        2: [2, 1, 0],
+        3: [1, 0, 2]
+    })
 
     result = streams.Streams(args, benchmark).get_stream_sequence(2)
     open_patched.assert_called_with(f'{benchmark.base_dir}/queries/streams.yaml', 'r')
