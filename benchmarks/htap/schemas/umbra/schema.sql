@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS customer (
   c_discount decimal(4,2),
   c_balance decimal(12,2),
   c_ytd_payment decimal(12,2),
-  c_payment_cnt smallint,
-  c_delivery_cnt smallint,
+  c_payment_cnt int,
+  c_delivery_cnt int,
   c_data text,
   primary key (c_w_id, c_d_id, c_id)
 ) partition by hash (c_w_id) with (storage = paged);
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS order_line (
   ol_i_id int,
   ol_supply_w_id smallint,
   ol_delivery_d timestamp,
-  ol_quantity smallint,
+  ol_quantity integer,
   ol_amount decimal(6,2),
   ol_dist_info char(24),
   primary key (ol_w_id, ol_d_id, ol_o_id, ol_number)
@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS stock (
   s_dist_09 char(24),
   s_dist_10 char(24),
   s_ytd decimal(8,0),
-  s_order_cnt smallint,
-  s_remote_cnt smallint,
+  s_order_cnt int,
+  s_remote_cnt int,
   s_data varchar(50),
   primary key (s_w_id, s_i_id)
 ) partition by hash (s_w_id) with (storage = paged);
