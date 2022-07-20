@@ -4,7 +4,7 @@ import time
 import traceback
 
 from datetime import datetime, timedelta
-from multiprocessing import Pool, Value, Queue
+from multiprocessing import Pool, Event, Value, Queue
 from psycopg.errors import DuplicateDatabase, DuplicateTable, ProgrammingError
 from urllib.parse import urlparse
 
@@ -61,7 +61,7 @@ class HTAPController:
             oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn,
                                               self.args.dry_run)
             next_reporting_time = time.time() + 0.1
-            while True:
+            while not worker_event.is_set():
                 self.oltp_sleep()
                 oltp_worker.next_transaction()
                 if next_reporting_time <= time.time():
@@ -72,8 +72,8 @@ class HTAPController:
     def olap_worker(self, worker_id):
         stream = AnalyticalStream(worker_id, self.args, self.range_delivery_date[0],
                                   self.latest_timestamp, self.stats_queue)
-        while True:
-            stream.run_next_query()
+        while not worker_event.is_set():
+            stream.run_next_query(worker_event)
 
     def analyze_worker(self):
         tables = ['customer', 'district', 'history', 'item', 'nation', 'new_orders',
@@ -82,14 +82,14 @@ class HTAPController:
         os.makedirs('results', exist_ok=True)
         with open('results/analyze.csv', 'w+') as csv:
             with DBConn(self.args.dsn) as conn:
-                while True:
+                while not worker_event.is_set():
                     for table in tables:
                         start = time.time()
                         conn.cursor.execute(f'ANALYZE {table}')
                         runtime = time.time() - start
                         csv.write(f'{datetime.now()}, {table}, {runtime:.2f}\n')
                         csv.flush()
-                    time.sleep(600)
+                    worker_event.wait(600)
 
     def _sql_error(self, msg):
         import sys
@@ -144,15 +144,22 @@ class HTAPController:
             print(f'Database statistics collection is disabled.')
             stats_conn_holder = nullcontext()
 
-        def worker_init():
+        def worker_init(event):
+            global worker_event
+            worker_event = event
+
             signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         num_total_workers = self.args.oltp_workers + self.args.olap_workers + 1
         with stats_conn_holder as stats_conn:
-            with Pool(num_total_workers, worker_init) as pool:
+            controller_event = Event()
+            with Pool(num_total_workers, worker_init, initargs=(controller_event,)) as pool:
                 oltp_workers = pool.map_async(self.oltp_worker, range(self.args.oltp_workers))
                 olap_workers = pool.map_async(self.olap_worker, range(self.args.olap_workers))
                 analyze_worker = pool.apply_async(self.analyze_worker) if not self.args.umbra else None
+
+                # Immediately close the pool, we are not planning on submitting further tasks
+                pool.close()
 
                 try:
                     update_interval = timedelta(seconds=min(self.args.monitoring_interval, self.args.csv_interval))
@@ -160,7 +167,7 @@ class HTAPController:
                     next_display = datetime.now() + display_interval
                     next_update = datetime.now() + update_interval
                     while True:
-                        # the workers are not supposed to ever stop.
+                        # the workers are not supposed to ever stop while we are not yet done with the benchmark.
                         # so test for errors by testing for ready() and if so propagate them
                         # by calling .get()
                         if self.args.oltp_workers > 0 and oltp_workers.ready():
@@ -197,3 +204,9 @@ class HTAPController:
                         burnin_duration = elapsed
                     self.monitor.display_summary(elapsed, burnin_duration)
                     self.stats.write_summary(self.args.csv_file, elapsed)
+
+                    # Notify any remaining workers
+                    controller_event.set()
+
+                    # And wait for them to finish
+                    pool.join()

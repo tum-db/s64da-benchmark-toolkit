@@ -115,8 +115,8 @@ class AnalyticalStream:
         query_args['min_date'] = self.tpch_date_to_benchmark_date(TPCH_DATE_RANGE[0])
         return query_template.substitute(**query_args)
 
-    def wait_until_enough_data(self, query_id):
-        while True:
+    def wait_until_enough_data(self, query_id, event):
+        while not event.is_set():
             available_data = datetime.fromtimestamp(self.latest_timestamp.value) - self.min_timestamp
             if available_data < WANTED_RANGE:
                 self.stats_queue.put(('olap', {
@@ -124,7 +124,7 @@ class AnalyticalStream:
                     'stream': self.stream_id,
                     'status': 'IGNORED' if is_ignored_query(self.args.ignored_queries, query_id) else 'Waiting'
                 }))
-                time.sleep(1)
+                event.wait(1)
             else:
                 return
 
@@ -138,7 +138,7 @@ class AnalyticalStream:
                 processed += processed_child
         return (planned, processed)
 
-    def run_next_query(self):
+    def run_next_query(self, event):
 
         def _report_if_last_query():
             if query_id == self.stream_last_query:
@@ -162,7 +162,9 @@ class AnalyticalStream:
         sql = self.get_query(query_id)
 
         if not self.args.dont_wait_until_enough_data:
-            self.wait_until_enough_data(query_id)
+            self.wait_until_enough_data(query_id, event)
+            if event.is_set():
+                return
 
         self.stats_queue.put(('olap', {
             'query': query_id,
