@@ -27,7 +27,7 @@ if [ ! -f ${DB_PATH}/htap/umbra.db ]; then
   COMPILATIONMODE=o BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server ${DB_PATH}/htap/umbra.db &
 
   # Load the initial database population
-  ./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
+  ./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/htap --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
 else
   echo "using existing benchmark database"
 
@@ -36,7 +36,7 @@ else
 fi
 
 # Run the HTAP benchmark
-./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres htap --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
+./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/htap htap --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
 
 # Shutdown the server
 kill -INT %1

@@ -238,12 +238,11 @@ class PrepareBenchmarkFactory:
         dsn_url = urlparse(self.args.dsn)
         dbname = dsn_url.path[1:]
 
-        if not self.args.umbra:
-            with DBConn(f'{dsn_url.scheme}://{dsn_url.netloc}/postgres') as conn:
-                print(f'Deleting Database {dbname} if it already exists')
-                conn.cursor.execute(f'DROP DATABASE IF EXISTS {dbname}')
-                print(f'Creating Database {dbname}')
-                conn.cursor.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'UTF-8'")
+        with DBConn(f'{dsn_url.scheme}://{dsn_url.netloc}/postgres') as conn:
+            print(f'Deleting Database {dbname} if it already exists')
+            conn.cursor.execute(f'DROP DATABASE IF EXISTS {dbname}')
+            print(f'Creating Database {dbname}')
+            conn.cursor.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'utf-8'")
 
         applied_schema_path = os.path.join(s64_benchmark_toolkit_root_dir, 'applied_schema.sql')
 
