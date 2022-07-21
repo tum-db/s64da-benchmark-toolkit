@@ -150,7 +150,7 @@ class HTAPController:
 
             signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-        num_total_workers = self.args.oltp_workers + self.args.olap_workers + 1
+        num_total_workers = self.args.oltp_workers + self.args.olap_workers + (1 if not self.args.umbra else 0)
         with stats_conn_holder as stats_conn:
             controller_event = Event()
             with Pool(num_total_workers, worker_init, initargs=(controller_event,)) as pool:
@@ -208,5 +208,10 @@ class HTAPController:
                     # Notify any remaining workers
                     controller_event.set()
 
-                    # And wait for them to finish
-                    pool.join()
+                    # And wait for them to finish. Do not use pool.join() here since that occasionally hangs for inexplicable reasons.
+                    if self.args.oltp_workers > 0:
+                        oltp_workers.get()
+                    if self.args.olap_workers > 0:
+                        olap_workers.get()
+                    if analyze_worker is not None:
+                        analyze_worker.get()
