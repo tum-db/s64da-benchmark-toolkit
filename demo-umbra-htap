@@ -2,11 +2,11 @@
 set -uo pipefail
 
 # Make sure that we actually clean up after ourselves even if the user kills the shell while we are still waiting for the server to shutdown
-trap "echo shell received SIGINT, sending SIGKILL to all child processes; kill -9 -- -$$" SIGINT
-trap "echo shell received SIGTERM, sending SIGKILL to all child processes; kill -9 -- -$$" SIGTERM
+trap "echo shell received SIGINT, sending SIGKILL to all child processes; kill -9 -- 0" SIGINT
+trap "echo shell received SIGTERM, sending SIGKILL to all child processes; kill -9 -- 0" SIGTERM
 
 # Also do this when the shell exits with an error in case one of the Python commands failed
-trap "echo subcommand exited with error, sending SIGKILL to all child processes; kill -9 -- -$$" ERR
+trap "echo subcommand exited with error, sending SIGKILL to all child processes; kill -9 -- 0" ERR
 
 UMBRA_PATH=${UMBRA_PATH:-.}
 DB_PATH=${DB_PATH:-.}
@@ -15,16 +15,25 @@ SCALE_FACTOR=$1
 OLTP_WORKERS=$2
 OLAP_WORKERS=$3
 
-# Clear the database directory
-rm -rf ${DB_PATH}/htap
-mkdir -p ${DB_PATH}/htap
+if [ ! -f ${DB_PATH}/htap/umbra.db ]; then
+  echo "initializing clean benchmark database"
 
-# Create the initial database state and start a server
-VERBOSITY=warning ${UMBRA_PATH}/sql -createdb ${DB_PATH}/htap/umbra.db <<< "ALTER ROLE postgres WITH LOGIN PASSWORD 'postgres';"
-COMPILATIONOMDE=o BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server ${DB_PATH}/htap/umbra.db &
+  # Clear the database directory
+  rm -rf ${DB_PATH}/htap
+  mkdir -p ${DB_PATH}/htap
 
-# Load the initial database population
-./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
+  # Create the initial database state and start a server
+  VERBOSITY=warning ${UMBRA_PATH}/sql -createdb ${DB_PATH}/htap/umbra.db <<< "ALTER ROLE postgres WITH LOGIN PASSWORD 'postgres';"
+  COMPILATIONMODE=o BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server ${DB_PATH}/htap/umbra.db &
+
+  # Load the initial database population
+  ./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
+else
+  echo "using existing benchmark database"
+
+  # Start a server on the existing database
+  COMPILATIONMODE=o BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server ${DB_PATH}/htap/umbra.db &
+fi
 
 # Run the HTAP benchmark
 ./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost/postgres htap --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
