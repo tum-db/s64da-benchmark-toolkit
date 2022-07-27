@@ -2,6 +2,8 @@ CREATE INDEX idx_customer ON customer (
     c_w_id
   , c_d_id
   , c_last
+  , c_first
+  , c_id
 );
 
 CREATE INDEX idx_orders ON orders (

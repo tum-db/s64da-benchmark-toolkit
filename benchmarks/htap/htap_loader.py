@@ -30,15 +30,17 @@ class Loader():
 
     def insert_rows(self, table, data):
         with DBConn(self.dsn) as conn:
-            with conn.cursor.copy(f'COPY {table} FROM STDIN') as copy:
-                for record in data:
-                    copy.write_row(record)
+            with conn.conn.transaction():
+                with conn.cursor.copy(f'COPY {table} FROM STDIN') as copy:
+                    for record in data:
+                        copy.write_row(record)
 
     def insert_data(self, table, data, columns=None):
         with DBConn(self.dsn) as conn:
-            with conn.cursor.copy(f"COPY {table} FROM STDIN NULL 'None'" if columns is None else f"COPY {table} ({','.join(columns)}) FROM STDIN NULL 'None'") as copy:
-                while chunk := data.read(COPY_SIZE):
-                    copy.write(chunk)
+            with conn.conn.transaction():
+                with conn.cursor.copy(f"COPY {table} FROM STDIN NULL 'None'" if columns is None else f"COPY {table} ({','.join(columns)}) FROM STDIN NULL 'None'") as copy:
+                    while chunk := data.read(COPY_SIZE):
+                        copy.write(chunk)
 
     def row_for_copy(self, row):
         return '\t'.join([str(v) for v in row]) + '\n'
@@ -212,13 +214,14 @@ class Loader():
         self.insert_data('orders', it)
 
         with DBConn(self.dsn) as conn:
-            conn.cursor.execute(
-                f'''
-                INSERT INTO new_orders(no_o_id, no_d_id, no_w_id)
-                SELECT o_id, o_d_id, o_w_id
-                FROM orders
-                WHERE o_id >= {FIRST_UNPROCESSED_O_ID} AND o_w_id = {self.warehouse_id}'''
-            )
+            with conn.conn.transaction():
+                conn.cursor.execute(
+                    f'''
+                    INSERT INTO new_orders(no_o_id, no_d_id, no_w_id)
+                    SELECT o_id, o_d_id, o_w_id
+                    FROM orders
+                    WHERE o_id >= {FIRST_UNPROCESSED_O_ID} AND o_w_id = {self.warehouse_id}'''
+                )
 
         print(f'Loading order_line ({self.warehouse_id})')
         it = StringIteratorIO((

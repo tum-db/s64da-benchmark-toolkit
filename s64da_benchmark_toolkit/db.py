@@ -104,8 +104,8 @@ class DB:
     def get_explain_output(connection, sql, umbra):
         try:
             with connection.cursor() as explain_plan_cursor:
-                explain_plan_cursor.execute(sql.replace('-- EXPLAIN (FORMAT JSON)', 'EXPLAIN (FORMAT JSON)' if not umbra else 'EXPLAIN VERBOSE'))
-                return json.dumps(explain_plan_cursor.fetchone()[0], indent=4)
+                explain_plan_cursor.execute(sql.replace('-- EXPLAIN (FORMAT JSON)', 'EXPLAIN (FORMAT JSON)' if not umbra else 'EXPLAIN'))
+                return sql + '\n' + json.dumps(explain_plan_cursor.fetchone()[0], indent=4)
 
         except psycopg.Error as e:
             return f'{{"Explain Output failed": "{str(e)}"}}'

@@ -102,7 +102,7 @@ class PrepareBenchmarkFactory:
                 print(stdout.decode('utf-8'), end='')
                 return stdout.decode('utf-8')
 
-    def _run_tasks_parallel(self, tasks, executor_class=ThreadPoolExecutor):
+    def _run_tasks_parallel(self, tasks, force_serial, executor_class=ThreadPoolExecutor):
         def get_runnable_task(task):
             if isinstance(task, tuple):
                 task, task_args = (task[0], task[1:])
@@ -130,7 +130,7 @@ class PrepareBenchmarkFactory:
 
         # If we're asked to use only with one job, run the tasks directly
         # in the main process to ease profiling.
-        if self.args.max_jobs == 1 or self.args.umbra:
+        if self.args.max_jobs == 1 or force_serial:
             for task in tasks:
                 runnable = get_runnable_task(task)
                 result = runnable[0](*runnable[1:]) if len(runnable) > 1 else runnable[0]()
@@ -194,9 +194,9 @@ class PrepareBenchmarkFactory:
                 ingest_tasks.extend(tasks)
 
             if PrepareBenchmarkFactory.PYTHON_LOADER:
-                self._run_tasks_parallel(ingest_tasks, executor_class=ProcessPoolExecutor)
+                self._run_tasks_parallel(ingest_tasks, False, executor_class=ProcessPoolExecutor)
             else:
-                self._run_tasks_parallel(ingest_tasks)
+                self._run_tasks_parallel(ingest_tasks, self.args.umbra)
 
         ingest_duration = time.time() - start_ingest
 
@@ -276,12 +276,12 @@ class PrepareBenchmarkFactory:
                 sql = sql_file.read()
 
             tasks = [self.psql_exec_cmd(cmd) for cmd in sqlparse_split(sql)]
-            self._run_tasks_parallel(tasks)
+            self._run_tasks_parallel(tasks, self.args.umbra)
 
     def add_common(self):
         common_path = os.path.join(self.schema_dir, '..', 'common_postgres', '*.sql') if not self.args.umbra else os.path.join(self.schema_dir, '..', 'common_umbra', '*.sql')
         tasks = [self.psql_exec_file(sql_file) for sql_file in glob.glob(common_path)]
-        self._run_tasks_parallel(tasks)
+        self._run_tasks_parallel(tasks, self.args.umbra)
 
     def vacuum_analyze(self):
         if not self.args.umbra:
@@ -296,12 +296,12 @@ class PrepareBenchmarkFactory:
                     analyze_tasks.append(self.psql_exec_cmd(f'ANALYZE {table}'))
 
             # WARNING: do NOT run vacuum and analyze at the same time because analyze stops as soon as it cannot take the lock...
-            self._run_tasks_parallel(vacuum_tasks)
-            self._run_tasks_parallel(analyze_tasks)
+            self._run_tasks_parallel(vacuum_tasks, self.args.umbra)
+            self._run_tasks_parallel(analyze_tasks, self.args.umbra)
 
     def update_all_columnstores(self):
         version = self.swarm64da_version
         if version and version >= Version('5.5'):
             print('Fully updating all columnstores')
             tasks = [self.psql_exec_cmd('SELECT swarm64da.columnstore_update_full()')]
-            self._run_tasks_parallel(tasks)
+            self._run_tasks_parallel(tasks, self.args.umbra)

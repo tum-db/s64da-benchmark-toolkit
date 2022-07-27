@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS order_line (
   ol_quantity integer,
   ol_amount decimal(6,2),
   ol_dist_info char(24),
-  primary key (ol_w_id, ol_d_id, ol_o_id, ol_number)
+  primary key (ol_w_id, ol_d_id, ol_o_id, ol_number, ol_i_id)
 ) partition by hash (ol_w_id) with (storage = paged);
 
 CREATE TABLE IF NOT EXISTS stock (
