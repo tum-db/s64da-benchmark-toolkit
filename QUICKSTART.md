@@ -40,6 +40,7 @@ should be invoked as follows:
 
     UMBRA_PATH=<path-to-umbra-binaries> \
     DB_PATH=<path-to-put-database-files> \
+    UMBRA_PORT=<port> \
     ./demo-umbra-htap \
         <scale-factor> \
         <oltp-workers> \
@@ -56,7 +57,8 @@ factor `1` (corresponding by default to 20 warehouses, see `benchmarks/htap/lib/
 and subsequently run the HTAP benchmark with `16` OLTP threads and `2` OLAP threads.
 For maximum performance, `DB_PATH` should point to a reasonably fast SSD drive (especially
 in terms of write bandwidth and response time). Alternatively one can also have `DB_PATH`
-point to directory into which a `tmpfs` is mounted.
+point to directory into which a `tmpfs` is mounted. `UMBRA_PORT` can be omitted and defaults
+to `54321`.
 
 More fine-grained control over the benchmark is possible by manually adjusting the 
 contents of the `demo-umbra-htap` script, which internally simply calls the `prepare_benchmark`
