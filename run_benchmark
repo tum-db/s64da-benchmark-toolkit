@@ -18,7 +18,7 @@ logger = logging.getLogger()
 
 def check_requirements():
     py_version_info = sys.version_info
-    if py_version_info < (3, 6):
+    if py_version_info < (3, 10):
         logger.error('Your version of Python does not match the requirements.')
         sys.exit()
 
