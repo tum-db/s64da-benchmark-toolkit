@@ -24,6 +24,7 @@ where
             l2.ol_o_id = l1.ol_o_id
             and l2.ol_w_id = l1.ol_w_id
             and l2.ol_d_id = l1.ol_d_id
+            and l2.ol_number <> l1.ol_number
             and l2.ol_delivery_d > l1.ol_delivery_d
             and l2.ol_delivery_d >= '$min_date'
     )
