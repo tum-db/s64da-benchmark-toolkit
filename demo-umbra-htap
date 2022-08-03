@@ -25,7 +25,7 @@ if [ ! -f ${DB_PATH}/htap/umbra.db ]; then
 
   # Create the initial database state and start a server
   VERBOSITY=warning ${UMBRA_PATH}/sql -createdb ${DB_PATH}/htap/umbra.db <<< "ALTER ROLE postgres WITH LOGIN PASSWORD 'postgres';"
-  BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server -port ${UMBRA_PORT} -address localhost ${DB_PATH}/htap/umbra.db &
+  VERBOSITY=panic ${UMBRA_PATH}/server -port ${UMBRA_PORT} -address localhost ${DB_PATH}/htap/umbra.db &
 
   # Load the initial database population
   ./prepare_benchmark --umbra --dsn postgresql://postgres:postgres@localhost:${UMBRA_PORT}/htap --benchmark htap --scale-factor ${SCALE_FACTOR} --schema umbra
@@ -33,7 +33,7 @@ else
   echo "using existing benchmark database"
 
   # Start a server on the existing database
-  BUFFERSIZE=$(expr 20 \* ${SCALE_FACTOR})G MAX_WAL_SIZE=$(expr 20 \* ${SCALE_FACTOR})G VERBOSITY=panic ${UMBRA_PATH}/server -port ${UMBRA_PORT} ${DB_PATH}/htap/umbra.db &
+  VERBOSITY=panic ${UMBRA_PATH}/server -port ${UMBRA_PORT} ${DB_PATH}/htap/umbra.db &
 fi
 
 # Run the HTAP benchmark
