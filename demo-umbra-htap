@@ -37,7 +37,7 @@ else
 fi
 
 # Run the HTAP benchmark
-./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost:${UMBRA_PORT}/htap htap --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
+./run_benchmark --umbra --dsn postgresql://postgres:postgres@localhost:${UMBRA_PORT}/htap htap --dont-wait-until-enough-data --oltp-workers ${OLTP_WORKERS} --olap-workers ${OLAP_WORKERS}
 
 # Shutdown the server
 kill -INT %1
