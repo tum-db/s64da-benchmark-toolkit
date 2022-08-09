@@ -7,12 +7,13 @@ from .helpers import MAX_ITEMS, DIST_PER_WARE, CUST_PER_DIST, NUM_ORDERS, STOCKS
 
 
 class TransactionalWorker:
-    def __init__(self, seed, num_warehouses, latest_timestamp, conn, dry_run):
+    def __init__(self, worker_id, num_warehouses, latest_timestamp, conn, dry_run, use_home_warehouse):
         self.conn = conn
-        self.random = Random(seed)
+        self.random = Random(worker_id)
         self.oltp_text = OLTPText(self.random)
         self.num_warehouses = num_warehouses
         self.dry_run = dry_run
+        self.home_warehouse = min(worker_id + 1, num_warehouses) if use_home_warehouse else None
 
         # the loader only generates timestamps for the orders table, and
         # generates a timestamp stream per warehouse.
@@ -58,7 +59,7 @@ class TransactionalWorker:
         self.add_stats(query_type, 'ok', start) if not error else self.add_stats(query_type, 'error', start)
 
     def new_order(self, timestamp):
-        w_id = self.random.randint_inclusive(1, self.num_warehouses)
+        w_id = self.home_warehouse if self.home_warehouse is not None else self.random.randint_inclusive(1, self.num_warehouses)
         d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
         c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
         order_line_count = self.random.randint_inclusive(5, 15)
@@ -88,7 +89,7 @@ class TransactionalWorker:
         self.execute_sql(sql, args, 'new_order', rbk == 1)
 
     def payment(self, timestamp):
-        w_id = self.random.randint_inclusive(1, self.num_warehouses)
+        w_id = self.home_warehouse if self.home_warehouse is not None else self.random.randint_inclusive(1, self.num_warehouses)
         d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
         c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
         h_amount = self.random.randint_inclusive(1, 5000)
@@ -107,7 +108,7 @@ class TransactionalWorker:
         self.execute_sql(sql, args, 'payment')
 
     def order_status(self):
-        w_id = self.random.randint_inclusive(1, self.num_warehouses)
+        w_id = self.home_warehouse if self.home_warehouse is not None else self.random.randint_inclusive(1, self.num_warehouses)
         d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
         c_id = self.random.nurand(1023, 1, CUST_PER_DIST)
         c_last = self.oltp_text.lastname(self.random.nurand(255, 0, 999))
@@ -118,7 +119,7 @@ class TransactionalWorker:
         self.execute_sql(sql, args, 'order_status')
 
     def delivery(self, timestamp):
-        w_id = self.random.randint_inclusive(1, self.num_warehouses)
+        w_id = self.home_warehouse if self.home_warehouse is not None else self.random.randint_inclusive(1, self.num_warehouses)
         o_carrier_id = self.random.randint_inclusive(1, 10)
 
         sql = 'CALL delivery(%t, %t, %t, %t::timestamptz)'
@@ -126,7 +127,7 @@ class TransactionalWorker:
         self.execute_sql(sql, args, 'delivery')
 
     def stock_level(self):
-        w_id = self.random.randint_inclusive(1, self.num_warehouses)
+        w_id = self.home_warehouse if self.home_warehouse is not None else self.random.randint_inclusive(1, self.num_warehouses)
         d_id = self.random.randint_inclusive(1, DIST_PER_WARE)
         level = self.random.randint_inclusive(10, 20)
 

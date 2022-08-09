@@ -66,6 +66,10 @@ def add_parser(subparsers):
                         help=('Whether to employ async commit semantics.'
                               ))
 
+    parser.add_argument('--use-home-warehouse', action='store_true', default=False,
+                        help=('Whether to pin workers to their home warehouse'
+                              ))
+
     parser.add_argument('--csv-file', default='results.csv', help=(
         'Where to save the summary csv file, if csv output is selected. '
         'The default is results.csv in the current directory.'

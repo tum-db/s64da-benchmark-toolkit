@@ -58,8 +58,7 @@ class HTAPController:
             if not self.args.no_async_commit:
                 conn.conn.execute('SET synchronous_commit = off') if not self.args.umbra else conn.conn.execute('SET async_commit = on')
 
-            oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn,
-                                              self.args.dry_run)
+            oltp_worker = TransactionalWorker(worker_id, self.num_warehouses, self.latest_timestamp, conn, self.args.dry_run, self.args.use_home_warehouse)
             next_reporting_time = time.time() + 0.1
             while not worker_event.is_set():
                 self.oltp_sleep()
